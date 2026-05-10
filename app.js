@@ -1,0 +1,392 @@
+// Data State
+let records = JSON.parse(localStorage.getItem('autolog_records')) || [];
+let currentFilter = 'all';
+let currentSearch = '';
+let currentSort = { column: 'tanggal', order: 'desc' };
+
+// DOM Elements
+const elements = {
+    vehicleInfo: document.getElementById('vehicleInfo'),
+    summaryTotalKm: document.getElementById('summaryTotalKm'),
+    summaryLastService: document.getElementById('summaryLastService'),
+    summaryUpcomingService: document.getElementById('summaryUpcomingService'),
+    upcomingCard: document.getElementById('upcomingCard'),
+    tableBody: document.getElementById('tableBody'),
+    emptyState: document.getElementById('emptyState'),
+    logTable: document.getElementById('logTable'),
+    searchInput: document.getElementById('searchInput'),
+    filterBtns: document.querySelectorAll('.filter-btn'),
+    sortableHeaders: document.querySelectorAll('th.sortable'),
+    desktopAddBtn: document.getElementById('desktopAddBtn'),
+    mobileAddBtn: document.getElementById('mobileAddBtn'),
+    recordModal: document.getElementById('recordModal'),
+    closeModalBtn: document.getElementById('closeModalBtn'),
+    cancelBtn: document.getElementById('cancelBtn'),
+    recordForm: document.getElementById('recordForm'),
+    modalTitle: document.getElementById('modalTitle'),
+    
+    // Form Inputs
+    recordId: document.getElementById('recordId'),
+    tanggal: document.getElementById('tanggal'),
+    tanggalKembali: document.getElementById('tanggalKembali'),
+    perawatan: document.getElementById('perawatan'),
+    km: document.getElementById('km'),
+    keterangan: document.getElementById('keterangan')
+};
+
+// Initialize App
+function init() {
+    // Load Vehicle Name
+    const savedVehicle = localStorage.getItem('autolog_vehicle');
+    if (savedVehicle) {
+        elements.vehicleInfo.textContent = savedVehicle;
+    }
+
+    elements.vehicleInfo.addEventListener('blur', () => {
+        localStorage.setItem('autolog_vehicle', elements.vehicleInfo.textContent);
+    });
+    
+    // Prevent line breaks in contenteditable
+    elements.vehicleInfo.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            elements.vehicleInfo.blur();
+        }
+    });
+
+    // Event Listeners
+    elements.desktopAddBtn.addEventListener('click', () => openModal());
+    elements.mobileAddBtn.addEventListener('click', () => openModal());
+    elements.closeModalBtn.addEventListener('click', closeModal);
+    elements.cancelBtn.addEventListener('click', closeModal);
+    elements.recordModal.addEventListener('click', (e) => {
+        if (e.target === elements.recordModal) closeModal();
+    });
+
+    elements.recordForm.addEventListener('submit', handleFormSubmit);
+    
+    elements.km.addEventListener('input', formatKmInput);
+
+    elements.searchInput.addEventListener('input', (e) => {
+        currentSearch = e.target.value.toLowerCase();
+        renderTable();
+    });
+
+    elements.filterBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            elements.filterBtns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentFilter = btn.dataset.filter;
+            renderTable();
+        });
+    });
+
+    elements.sortableHeaders.forEach(header => {
+        header.addEventListener('click', () => {
+            const column = header.dataset.sort;
+            if (currentSort.column === column) {
+                currentSort.order = currentSort.order === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSort.column = column;
+                currentSort.order = 'desc'; // Default to desc when changing column
+            }
+            updateSortHeaders();
+            renderTable();
+        });
+    });
+
+    // Initial Render
+    updateSortHeaders();
+    renderTable();
+}
+
+// Format KM Input with Thousands Separator
+function formatKmInput(e) {
+    let value = e.target.value.replace(/\D/g, ''); // Remove non-digits
+    if (value) {
+        value = parseInt(value, 10).toLocaleString('en-US');
+    }
+    e.target.value = value;
+}
+
+// Modal Functions
+function openModal(editId = null) {
+    if (editId) {
+        const record = records.find(r => r.id === editId);
+        if (record) {
+            elements.modalTitle.textContent = 'Edit Record';
+            elements.recordId.value = record.id;
+            elements.tanggal.value = record.tanggal;
+            elements.tanggalKembali.value = record.tanggalKembali;
+            elements.perawatan.value = record.perawatan;
+            elements.km.value = record.km.toLocaleString('en-US');
+            elements.keterangan.value = record.keterangan;
+        }
+    } else {
+        elements.modalTitle.textContent = 'Add New Record';
+        elements.recordForm.reset();
+        elements.recordId.value = '';
+        
+        // Default dates
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        elements.tanggal.value = `${year}-${month}-${day}`;
+        
+        // Default next service (+3 months)
+        const nextService = new Date(today);
+        nextService.setMonth(nextService.getMonth() + 3);
+        const nextYear = nextService.getFullYear();
+        const nextMonth = String(nextService.getMonth() + 1).padStart(2, '0');
+        const nextDay = String(nextService.getDate()).padStart(2, '0');
+        elements.tanggalKembali.value = `${nextYear}-${nextMonth}-${nextDay}`;
+    }
+    
+    elements.recordModal.classList.add('active');
+}
+
+function closeModal() {
+    elements.recordModal.classList.remove('active');
+}
+
+// Form Submit Handler
+function handleFormSubmit(e) {
+    e.preventDefault();
+    
+    const id = elements.recordId.value;
+    const kmValue = parseInt(elements.km.value.replace(/\D/g, ''), 10) || 0;
+    
+    const recordData = {
+        tanggal: elements.tanggal.value,
+        tanggalKembali: elements.tanggalKembali.value,
+        perawatan: elements.perawatan.value,
+        km: kmValue,
+        keterangan: elements.keterangan.value
+    };
+
+    if (id) {
+        // Edit
+        const index = records.findIndex(r => r.id === parseInt(id));
+        if (index !== -1) {
+            records[index] = { ...records[index], ...recordData };
+        }
+    } else {
+        // Add
+        const newRecord = {
+            id: Date.now(),
+            ...recordData
+        };
+        records.push(newRecord);
+    }
+
+    saveAndRender();
+    closeModal();
+    
+    Swal.fire({
+        icon: 'success',
+        title: 'Tersimpan!',
+        text: 'Data perawatan berhasil disimpan.',
+        timer: 1500,
+        showConfirmButton: false,
+        toast: true,
+        position: 'top-end'
+    });
+}
+
+// Delete Record
+function deleteRecord(id) {
+    Swal.fire({
+        title: 'Hapus Data?',
+        text: "Data yang dihapus tidak dapat dikembalikan!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ef4444',
+        cancelButtonColor: '#64748b',
+        confirmButtonText: 'Ya, Hapus!',
+        cancelButtonText: 'Batal'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            records = records.filter(r => r.id !== id);
+            saveAndRender();
+            Swal.fire({
+                icon: 'success',
+                title: 'Terhapus!',
+                text: 'Data telah dihapus.',
+                timer: 1500,
+                showConfirmButton: false,
+                toast: true,
+                position: 'top-end'
+            });
+        }
+    });
+}
+
+// Save & Update UI
+function saveAndRender() {
+    localStorage.setItem('autolog_records', JSON.stringify(records));
+    renderTable();
+}
+
+// Helper: Check if date is within next 14 days
+function isWithin14Days(dateString) {
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    const targetDate = new Date(dateString);
+    targetDate.setHours(0,0,0,0);
+    
+    const diffTime = targetDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    // Valid warning: upcoming within 14 days OR overdue (negative days)
+    return diffDays <= 14;
+}
+
+// Helper: Format Date
+function formatDate(dateString) {
+    if (!dateString) return '-';
+    const options = { day: '2-digit', month: 'short', year: 'numeric' };
+    return new Date(dateString).toLocaleDateString('id-ID', options);
+}
+
+// Helper: Get Perawatan Label
+function getPerawatanLabel(code) {
+    const map = {
+        'P1': 'P1: Aki',
+        'P2': 'P2: Servis Rutin',
+        'P3': 'P3: Lain-lain'
+    };
+    return map[code] || code;
+}
+
+// Update Sort Icons
+function updateSortHeaders() {
+    elements.sortableHeaders.forEach(header => {
+        header.classList.remove('active-sort', 'asc', 'desc');
+        if (header.dataset.sort === currentSort.column) {
+            header.classList.add('active-sort', currentSort.order);
+        }
+    });
+}
+
+// Render Table
+function renderTable() {
+    // 1. Filter
+    let filteredRecords = records.filter(r => {
+        const matchFilter = currentFilter === 'all' || r.perawatan === currentFilter;
+        const matchSearch = r.keterangan.toLowerCase().includes(currentSearch);
+        return matchFilter && matchSearch;
+    });
+
+    // 2. Sort
+    filteredRecords.sort((a, b) => {
+        let valA = a[currentSort.column];
+        let valB = b[currentSort.column];
+        
+        if (currentSort.column === 'km') {
+            valA = parseInt(valA, 10);
+            valB = parseInt(valB, 10);
+        } else if (currentSort.column === 'tanggal' || currentSort.column === 'tanggalKembali') {
+            valA = new Date(valA).getTime();
+            valB = new Date(valB).getTime();
+        }
+        
+        if (currentSort.order === 'asc') {
+            return valA > valB ? 1 : (valA < valB ? -1 : 0);
+        } else {
+            return valA < valB ? 1 : (valA > valB ? -1 : 0);
+        }
+    });
+
+    // 3. Render
+    elements.tableBody.innerHTML = '';
+    
+    if (filteredRecords.length === 0) {
+        elements.emptyState.style.display = 'block';
+        elements.logTable.style.display = 'none';
+    } else {
+        elements.emptyState.style.display = 'none';
+        elements.logTable.style.display = 'table';
+        
+        filteredRecords.forEach((record, index) => {
+            const tr = document.createElement('tr');
+            
+            const isWarning = isWithin14Days(record.tanggalKembali);
+            if (isWarning) tr.classList.add('row-warning');
+            
+            tr.innerHTML = `
+                <td>${index + 1}</td>
+                <td>${formatDate(record.tanggal)}</td>
+                <td>
+                    ${formatDate(record.tanggalKembali)}
+                    ${isWarning ? '<span class="warning-badge"><i class="ph-fill ph-warning-circle"></i> Segera</span>' : ''}
+                </td>
+                <td><span class="badge-category cat-${record.perawatan}">${getPerawatanLabel(record.perawatan)}</span></td>
+                <td>${record.km.toLocaleString('en-US')}</td>
+                <td>${record.keterangan}</td>
+                <td>
+                    <div class="actions">
+                        <button class="action-btn edit-btn" onclick="openModal(${record.id})" title="Edit"><i class="ph ph-pencil-simple"></i></button>
+                        <button class="action-btn delete-btn" onclick="deleteRecord(${record.id})" title="Delete"><i class="ph ph-trash"></i></button>
+                    </div>
+                </td>
+            `;
+            elements.tableBody.appendChild(tr);
+        });
+    }
+
+    updateDashboardStats();
+}
+
+// Update Dashboard Statistics
+function updateDashboardStats() {
+    if (records.length === 0) {
+        elements.summaryTotalKm.textContent = '0';
+        elements.summaryLastService.textContent = '-';
+        elements.summaryUpcomingService.textContent = '-';
+        elements.upcomingCard.classList.remove('warning-card');
+        return;
+    }
+
+    // Total KM (Max KM)
+    const maxKm = Math.max(...records.map(r => r.km));
+    elements.summaryTotalKm.textContent = maxKm.toLocaleString('en-US');
+
+    // Last Service Date (Max Tanggal)
+    const sortedByDateDesc = [...records].sort((a, b) => new Date(b.tanggal).getTime() - new Date(a.tanggal).getTime());
+    elements.summaryLastService.textContent = formatDate(sortedByDateDesc[0].tanggal);
+
+    // Upcoming Alert (Nearest Tanggal Kembali)
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    
+    // Sort all records by tanggalKembali
+    const upcomingRecords = [...records].sort((a, b) => new Date(a.tanggalKembali).getTime() - new Date(b.tanggalKembali).getTime());
+    
+    // Find the nearest one that is >= today
+    let nearest = upcomingRecords.find(r => new Date(r.tanggalKembali).getTime() >= today.getTime());
+    
+    // If all are past, just take the most recent past one (which would be the last in the sorted array if we just look at past, but wait, if it's past, it's urgent)
+    if (!nearest) {
+        // All dates are in the past. Take the one with largest date (most recent past) or smallest date? Smallest date is most overdue.
+        // Let's just take the first one (most overdue)
+        nearest = upcomingRecords[0];
+    }
+
+    if (nearest) {
+        if (isWithin14Days(nearest.tanggalKembali)) {
+            elements.upcomingCard.classList.add('warning-card');
+            elements.summaryUpcomingService.innerHTML = `${formatDate(nearest.tanggalKembali)} <span class="warning-badge" style="font-size: 0.8rem;"><i class="ph-fill ph-warning-circle"></i> Segera</span>`;
+        } else {
+            elements.upcomingCard.classList.remove('warning-card');
+            elements.summaryUpcomingService.textContent = formatDate(nearest.tanggalKembali);
+        }
+    }
+}
+
+// Make functions global for inline onclick
+window.openModal = openModal;
+window.deleteRecord = deleteRecord;
+
+// Run App
+document.addEventListener('DOMContentLoaded', init);
