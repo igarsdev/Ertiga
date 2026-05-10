@@ -146,6 +146,20 @@ body {
     transform: rotate(15deg);
 }
 
+.icon-btn.active {
+    color: var(--accent);
+}
+
+.icon-btn.active i {
+    animation: pulseNotif 2s infinite;
+}
+
+@keyframes pulseNotif {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
 .user-profile i {
     font-size: 40px;
     color: var(--primary-light);
@@ -499,6 +513,12 @@ tbody tr:hover td {
     background: #fee2e2; 
     color: #ef4444; 
     border-color: #fecaca;
+}
+
+.wa-btn:hover {
+    background: #dcfce7;
+    color: #16a34a;
+    border-color: #bbf7d0;
 }
 
 .empty-state {

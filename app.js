@@ -19,6 +19,7 @@ const elements = {
     sortableHeaders: document.querySelectorAll('th.sortable'),
     desktopAddBtn: document.getElementById('desktopAddBtn'),
     mobileAddBtn: document.getElementById('mobileAddBtn'),
+    notifToggle: document.getElementById('notifToggle'),
     recordModal: document.getElementById('recordModal'),
     closeModalBtn: document.getElementById('closeModalBtn'),
     cancelBtn: document.getElementById('cancelBtn'),
@@ -57,6 +58,7 @@ function init() {
     // Event Listeners
     elements.desktopAddBtn.addEventListener('click', () => openModal());
     elements.mobileAddBtn.addEventListener('click', () => openModal());
+    elements.notifToggle.addEventListener('click', requestNotificationPermission);
     elements.closeModalBtn.addEventListener('click', closeModal);
     elements.cancelBtn.addEventListener('click', closeModal);
     elements.recordModal.addEventListener('click', (e) => {
@@ -98,6 +100,111 @@ function init() {
     // Initial Render
     updateSortHeaders();
     renderTable();
+    initNotifications();
+}
+
+// Notification Logic
+function initNotifications() {
+    if (!("Notification" in window)) {
+        elements.notifToggle.style.display = 'none';
+        return;
+    }
+
+    if (Notification.permission === "granted") {
+        updateNotifIcon(true);
+        checkUpcomingForNotif();
+    } else {
+        updateNotifIcon(false);
+    }
+}
+
+function updateNotifIcon(granted) {
+    const icon = elements.notifToggle.querySelector('i');
+    if (granted) {
+        icon.className = 'ph ph-bell';
+        elements.notifToggle.classList.add('active');
+        elements.notifToggle.title = 'Notifikasi Aktif';
+    } else {
+        icon.className = 'ph ph-bell-slash';
+        elements.notifToggle.classList.remove('active');
+        elements.notifToggle.title = 'Aktifkan Notifikasi';
+    }
+}
+
+function requestNotificationPermission() {
+    if (!("Notification" in window)) {
+        Swal.fire('Error', 'Browser Anda tidak mendukung notifikasi.', 'error');
+        return;
+    }
+
+    Notification.requestPermission().then(permission => {
+        if (permission === "granted") {
+            updateNotifIcon(true);
+            Swal.fire({
+                icon: 'success',
+                title: 'Notifikasi Aktif',
+                text: 'Anda akan menerima pemberitahuan saat jadwal servis tiba.',
+                timer: 2000,
+                showConfirmButton: false
+            });
+            checkUpcomingForNotif();
+        } else {
+            updateNotifIcon(false);
+        }
+    });
+}
+
+function checkUpcomingForNotif() {
+    if (Notification.permission !== "granted") return;
+
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    
+    records.forEach(record => {
+        const targetDate = new Date(record.tanggalKembali);
+        targetDate.setHours(0,0,0,0);
+        
+        const diffTime = targetDate.getTime() - today.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        // Notify if today or overdue (and not notified today yet)
+        if (diffDays <= 0) {
+            const lastNotifKey = `notif_sent_${record.id}`;
+            const lastSent = localStorage.getItem(lastNotifKey);
+            const todayStr = today.toDateString();
+
+            if (lastSent !== todayStr) {
+                showSystemNotification(record);
+                localStorage.setItem(lastNotifKey, todayStr);
+            }
+        }
+    });
+}
+
+function showSystemNotification(record) {
+    const title = `Peringatan Servis: ${getPerawatanLabel(record.perawatan)}`;
+    const options = {
+        body: `Servis jatuh tempo pada ${formatDate(record.tanggalKembali)}. Segera lakukan pengecekan!`,
+        icon: 'https://cdn-icons-png.flaticon.com/512/2991/2991148.png' // Generic car icon
+    };
+    
+    new Notification(title, options);
+}
+
+// WhatsApp Integration
+function sendToWhatsApp(id) {
+    const record = records.find(r => r.id === id);
+    if (!record) return;
+
+    const vehicle = elements.vehicleInfo.textContent;
+    const message = `*PENGINGAT SERVIS ${vehicle}*%0A%0A` +
+                    `*Kategori:* ${getPerawatanLabel(record.perawatan)}%0A` +
+                    `*Jadwal Servis:* ${formatDate(record.tanggalKembali)}%0A` +
+                    `*KM Terakhir:* ${record.km.toLocaleString('en-US')}%0A` +
+                    `*Keterangan:* ${record.keterangan}%0A%0A` +
+                    `_Dikirim melalui AutoLog / ServisKu_`;
+    
+    window.open(`https://wa.me/?text=${message}`, '_blank');
 }
 
 // Format KM Input with Thousands Separator
@@ -181,6 +288,7 @@ function handleFormSubmit(e) {
     }
 
     saveAndRender();
+    checkUpcomingForNotif();
     closeModal();
     
     Swal.fire({
@@ -326,6 +434,7 @@ function renderTable() {
                 <td>${record.keterangan}</td>
                 <td>
                     <div class="actions">
+                        <button class="action-btn wa-btn" onclick="sendToWhatsApp(${record.id})" title="Kirim ke WhatsApp"><i class="ph ph-whatsapp-logo"></i></button>
                         <button class="action-btn edit-btn" onclick="openModal(${record.id})" title="Edit"><i class="ph ph-pencil-simple"></i></button>
                         <button class="action-btn delete-btn" onclick="deleteRecord(${record.id})" title="Delete"><i class="ph ph-trash"></i></button>
                     </div>
@@ -387,6 +496,7 @@ function updateDashboardStats() {
 // Make functions global for inline onclick
 window.openModal = openModal;
 window.deleteRecord = deleteRecord;
+window.sendToWhatsApp = sendToWhatsApp;
 
 // Run App
 document.addEventListener('DOMContentLoaded', init);
