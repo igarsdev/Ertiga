@@ -1000,6 +1000,7 @@ function updateDashboardStats() {
 window.openModal = openModal;
 window.deleteRecord = deleteRecord;
 window.sendToWhatsApp = sendToWhatsApp;
+window.addToCalendar = addToCalendar;
 window.installApp = installApp;
 window.exportRecordsToCsv = exportRecordsToCsv;
 window.importRecordsFromJson = importRecordsFromJson;
