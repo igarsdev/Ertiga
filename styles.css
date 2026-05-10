@@ -14,6 +14,16 @@
   --border-radius: 16px;
   --border-radius-sm: 12px;
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  /* Responsive sizing */
+  --header-padding: clamp(12px, 2vw, 24px);
+  --content-padding: clamp(16px, 3vw, 32px);
+  --gap-sm: clamp(8px, 2vw, 12px);
+  --gap-md: clamp(12px, 3vw, 20px);
+  --gap-lg: clamp(16px, 4vw, 32px);
+  --font-h1: clamp(1.1rem, 4vw, 1.5rem);
+  --font-h2: clamp(1rem, 3vw, 1.25rem);
+  --font-h3: clamp(0.875rem, 2vw, 1rem);
+  --font-body: clamp(0.875rem, 1.5vw, 1rem);
 }
 
 * {
@@ -99,12 +109,13 @@ textarea {
 }
 
 .app-container {
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 0 20px;
+  padding: 0 var(--content-padding);
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  width: 100%;
 }
 
 /* Glassmorphism Utilities */
@@ -122,10 +133,10 @@ textarea {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 24px;
-  margin-top: 20px;
+  padding: var(--header-padding) clamp(16px, 3vw, 32px);
+  margin-top: clamp(8px, 2vw, 20px);
   position: sticky;
-  top: 20px;
+  top: max(0px, env(safe-area-inset-top, 0px));
   z-index: 100;
 }
 
@@ -141,7 +152,7 @@ textarea {
 }
 
 .header-titles h1 {
-  font-size: 1.25rem;
+  font-size: var(--font-h1);
   font-weight: 700;
   color: var(--primary);
   letter-spacing: -0.5px;
@@ -280,9 +291,12 @@ textarea {
 /* Dashboard Overview */
 .dashboard-overview {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 20px;
-  margin-top: 30px;
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(clamp(250px, 30vw, 350px), 1fr)
+  );
+  gap: var(--gap-lg);
+  margin-top: var(--gap-lg);
 }
 
 .summary-card {
@@ -377,9 +391,9 @@ textarea {
 
 /* Maintenance Log Section */
 .log-section {
-  margin-top: 30px;
-  padding: 24px;
-  margin-bottom: 40px;
+  margin-top: var(--gap-lg);
+  padding: var(--content-padding);
+  margin-bottom: clamp(40px, 10vh, 80px);
 }
 
 .log-header {
@@ -399,16 +413,17 @@ textarea {
   background: var(--primary);
   color: white;
   border: none;
-  padding: 10px 20px;
+  padding: clamp(8px, 2vw, 12px) clamp(16px, 3vw, 24px);
   border-radius: var(--border-radius-sm);
   font-weight: 600;
-  font-size: 0.875rem;
+  font-size: clamp(0.8rem, 1.5vw, 0.95rem);
   cursor: pointer;
   display: flex;
   align-items: center;
   gap: 8px;
   transition: var(--transition);
   box-shadow: 0 4px 12px rgba(30, 58, 138, 0.2);
+  white-space: nowrap;
 }
 
 .btn-primary:hover {
@@ -421,12 +436,13 @@ textarea {
   background: transparent;
   color: var(--text-muted);
   border: 1px solid var(--border);
-  padding: 10px 20px;
+  padding: clamp(8px, 2vw, 12px) clamp(16px, 3vw, 24px);
   border-radius: var(--border-radius-sm);
   font-weight: 600;
-  font-size: 0.875rem;
+  font-size: clamp(0.8rem, 1.5vw, 0.95rem);
   cursor: pointer;
   transition: var(--transition);
+  white-space: nowrap;
 }
 
 .btn-secondary:hover {
@@ -438,14 +454,14 @@ textarea {
   display: flex;
   flex-wrap: wrap;
   justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 24px;
+  gap: var(--gap-md);
+  margin-bottom: var(--gap-md);
 }
 
 .search-box {
   position: relative;
   flex: 1;
-  min-width: 250px;
+  min-width: clamp(150px, 20vw, 400px);
 }
 
 .search-box i {
@@ -773,12 +789,14 @@ tbody tr:hover td {
 
 .modal-content {
   background: white;
-  width: 90%;
-  max-width: 500px;
+  width: clamp(280px, 90%, 500px);
+  max-width: 90vw;
+  max-height: 90vh;
   border-radius: var(--border-radius);
   box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
   transform: scale(0.95) translateY(20px);
   transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  overflow-y: auto;
 }
 
 .glass-modal {
@@ -796,14 +814,16 @@ tbody tr:hover td {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 24px;
+  padding: clamp(16px, 4vw, 24px);
   border-bottom: 1px solid var(--border);
+  gap: 12px;
 }
 
 .modal-header h2 {
-  font-size: 1.25rem;
+  font-size: var(--font-h2);
   color: var(--text-main);
   font-weight: 600;
+  flex-grow: 1;
 }
 
 .close-modal-btn {
@@ -828,10 +848,12 @@ tbody tr:hover td {
 }
 
 .record-form {
-  padding: 24px;
+  padding: clamp(16px, 4vw, 24px);
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: var(--gap-md);
+  max-height: calc(90vh - 150px);
+  overflow-y: auto;
 }
 
 .form-group {
@@ -913,7 +935,430 @@ textarea {
   border-top: 1px solid var(--border);
 }
 
-/* SweetAlert overrides for rounded, modern look */
+/* ============================================
+   RESPONSIVE DESIGN - BREAKPOINTS
+   ============================================ */
+
+/* Extra Small Devices (< 320px) */
+@media (max-width: 319px) {
+  :root {
+    --content-padding: 12px;
+    --header-padding: 8px;
+  }
+
+  .header-titles h1 {
+    font-size: 0.95rem;
+  }
+
+  .card-info p {
+    font-size: 1rem;
+  }
+
+  .btn-primary,
+  .btn-secondary {
+    padding: 8px 12px;
+    font-size: 0.8rem;
+  }
+
+  .filter-btn {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+  }
+
+  th,
+  td {
+    padding: 10px 8px;
+    font-size: 0.75rem;
+  }
+}
+
+/* Small Devices - Portrait (320px - 480px) */
+@media (min-width: 320px) and (max-width: 480px) {
+  .summary-card {
+    flex-direction: column;
+    padding: clamp(12px, 3vw, 16px);
+    text-align: center;
+  }
+
+  .card-icon {
+    width: clamp(40px, 10vw, 50px);
+    height: clamp(40px, 10vw, 50px);
+    font-size: clamp(20px, 5vw, 24px);
+  }
+
+  .card-info {
+    flex-grow: 1;
+  }
+
+  .card-info h3 {
+    font-size: 0.8rem;
+  }
+
+  .card-info p {
+    font-size: 1.1rem;
+  }
+
+  .log-header {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .log-header h2 {
+    font-size: var(--font-h2);
+    margin-bottom: 0;
+  }
+
+  .desktop-add-btn {
+    width: 100%;
+  }
+}
+
+/* Medium Devices - Portrait (480px - 768px) */
+@media (min-width: 480px) and (max-width: 768px) {
+  .summary-card {
+    padding: 16px;
+  }
+
+  .card-icon {
+    width: 50px;
+    height: 50px;
+    font-size: 24px;
+  }
+
+  .log-header {
+    gap: 16px;
+  }
+
+  .search-box {
+    min-width: 60%;
+  }
+
+  .filter-btn {
+    padding: 8px 14px;
+  }
+}
+
+/* Tablets - Landscape (768px - 1024px) */
+@media (min-width: 768px) and (max-width: 1024px) {
+  :root {
+    --content-padding: 24px;
+    --header-padding: 16px;
+  }
+
+  .dashboard-overview {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .log-controls {
+    gap: 16px;
+  }
+
+  .search-box {
+    flex: 0 1 45%;
+    min-width: auto;
+  }
+
+  .filter-group {
+    flex: 0 1 50%;
+  }
+
+  .log-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .desktop-add-btn {
+    display: block !important;
+  }
+
+  .summary-card {
+    padding: 20px;
+  }
+
+  .card-icon {
+    width: 55px;
+    height: 55px;
+    font-size: 26px;
+  }
+
+  .card-info p {
+    font-size: 1.4rem;
+  }
+}
+
+/* Tablets - Landscape & Small Desktop (1024px - 1280px) */
+@media (min-width: 1024px) and (max-width: 1279px) {
+  :root {
+    --content-padding: 28px;
+  }
+
+  .dashboard-overview {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .log-controls {
+    gap: 20px;
+    justify-content: flex-start;
+  }
+
+  .search-box {
+    flex: 0 1 40%;
+  }
+
+  .filter-group {
+    flex: 1;
+    justify-content: flex-end;
+  }
+}
+
+/* Standard Desktop (1280px - 1600px) */
+@media (min-width: 1280px) and (max-width: 1599px) {
+  :root {
+    --content-padding: 32px;
+  }
+
+  .app-container {
+    max-width: 1280px;
+  }
+
+  .dashboard-overview {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+  }
+
+  .summary-card {
+    padding: 24px;
+  }
+
+  .card-icon {
+    width: 60px;
+    height: 60px;
+    font-size: 28px;
+  }
+
+  .card-info p {
+    font-size: 1.5rem;
+  }
+
+  .log-controls {
+    gap: 24px;
+  }
+
+  .search-box {
+    flex: 0 1 35%;
+  }
+
+  table {
+    border-spacing: 0 12px;
+  }
+
+  th {
+    padding: 14px 18px;
+  }
+
+  td {
+    padding: 18px;
+  }
+}
+
+/* Large Desktop (1600px+) */
+@media (min-width: 1600px) {
+  :root {
+    --content-padding: 40px;
+    --header-padding: 20px;
+  }
+
+  .app-container {
+    max-width: 1400px;
+  }
+
+  .dashboard-overview {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+  }
+
+  .summary-card {
+    padding: 28px;
+  }
+
+  .card-icon {
+    width: 70px;
+    height: 70px;
+    font-size: 32px;
+  }
+
+  .card-info p {
+    font-size: 1.75rem;
+  }
+
+  .log-header {
+    margin-bottom: 32px;
+  }
+
+  .log-header h2 {
+    font-size: 1.5rem;
+  }
+
+  table {
+    border-spacing: 0 12px;
+  }
+
+  th {
+    padding: 16px 20px;
+    font-size: 0.95rem;
+  }
+
+  td {
+    padding: 20px;
+    font-size: 0.95rem;
+  }
+}
+
+/* Landscape Mode - Small Screens */
+@media (max-height: 600px) and (orientation: landscape) {
+  .top-header {
+    padding: 8px 16px;
+    margin-top: 0;
+  }
+
+  .header-titles h1 {
+    font-size: 1rem;
+  }
+
+  .vehicle-info {
+    display: none;
+  }
+
+  .dashboard-overview {
+    margin-top: 12px;
+    gap: 12px;
+  }
+
+  .summary-card {
+    padding: 12px;
+  }
+
+  .card-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+  }
+
+  .card-info h3 {
+    font-size: 0.7rem;
+  }
+
+  .card-info p {
+    font-size: 1rem;
+  }
+
+  .log-section {
+    margin-top: 12px;
+    padding: 12px;
+    margin-bottom: 60px;
+  }
+
+  .app-footer {
+    display: none;
+  }
+}
+
+/* Landscape Mode - Larger Screens */
+@media (min-height: 600px) and (orientation: landscape) {
+  .app-container {
+    padding-bottom: 60px;
+  }
+}
+
+/* Print Styles */
+@media print {
+  body {
+    background: white;
+  }
+
+  .mesh-background,
+  .top-header,
+  .bottom-nav,
+  .floating-add-btn,
+  .modal-overlay,
+  .app-footer {
+    display: none !important;
+  }
+
+  .app-container {
+    padding: 0;
+    max-width: 100%;
+  }
+
+  .log-section {
+    margin-bottom: 0;
+  }
+
+  table {
+    width: 100%;
+    page-break-inside: avoid;
+  }
+
+  tr {
+    page-break-inside: avoid;
+  }
+}
+
+/* Responsive Typography Fallback */
+@media (max-width: 599px) {
+  h1 {
+    font-size: 1.1rem;
+  }
+
+  h2 {
+    font-size: 1rem;
+  }
+
+  h3 {
+    font-size: 0.875rem;
+  }
+
+  body {
+    font-size: 0.875rem;
+  }
+}
+
+@media (min-width: 600px) and (max-width: 999px) {
+  h1 {
+    font-size: 1.25rem;
+  }
+
+  h2 {
+    font-size: 1.1rem;
+  }
+
+  h3 {
+    font-size: 0.95rem;
+  }
+
+  body {
+    font-size: 0.9rem;
+  }
+}
+
+@media (min-width: 1000px) {
+  h1 {
+    font-size: 1.5rem;
+  }
+
+  h2 {
+    font-size: 1.25rem;
+  }
+
+  h3 {
+    font-size: 1rem;
+  }
+
+  body {
+    font-size: 1rem;
+  }
+}
 div:where(.swal2-container) div:where(.swal2-popup) {
   border-radius: var(--border-radius);
   padding: 24px;

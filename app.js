@@ -74,6 +74,53 @@ function setupInstallPrompt() {
   });
 }
 
+// Responsive Handler - Detect screen size changes
+function setupResponsiveHandlers() {
+  // Handle window resize
+  let resizeTimer;
+  window.addEventListener("resize", () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      handleResponsiveLayout();
+    }, 250);
+  });
+
+  // Handle orientation change
+  window.addEventListener("orientationchange", () => {
+    setTimeout(() => {
+      handleResponsiveLayout();
+      renderTable(); // Re-render table on orientation change
+    }, 100);
+  });
+
+  // Initial responsive check
+  handleResponsiveLayout();
+}
+
+// Handle responsive layout adjustments
+function handleResponsiveLayout() {
+  const screenWidth = window.innerWidth;
+  const screenHeight = window.innerHeight;
+  const isMobile = screenWidth < 768;
+  const isTablet = screenWidth >= 768 && screenWidth < 1024;
+  const isLandscape = screenHeight < screenWidth;
+
+  // Store in data attribute for CSS access if needed
+  document.documentElement.setAttribute(
+    "data-device",
+    isMobile ? "mobile" : isTablet ? "tablet" : "desktop",
+  );
+  document.documentElement.setAttribute(
+    "data-orientation",
+    isLandscape ? "landscape" : "portrait",
+  );
+
+  // Log for debugging
+  console.log(
+    `Device: ${isMobile ? "mobile" : isTablet ? "tablet" : "desktop"} (${screenWidth}x${screenHeight})`,
+  );
+}
+
 // Initialize App
 function init() {
   // Load Vehicle Name
@@ -163,6 +210,7 @@ function init() {
 
   // Capture PWA Install Prompt
   setupInstallPrompt();
+  setupResponsiveHandlers();
   document.getElementById("settingsBtn").addEventListener("click", () => {
     Swal.fire({
       title: "AutoLog Menu",
