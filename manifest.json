@@ -1,12 +1,14 @@
 {
-  "name": "AutoLog / ServisKu",
+  "name": "AutoLog / ServisKu - Car Maintenance Tracker",
   "short_name": "AutoLog",
-  "description": "Aplikasi pencatatan dan pengingat servis kendaraan",
+  "description": "Aplikasi pencatatan dan pengingat servis kendaraan dengan notifikasi real-time",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
-  "background_color": "#1E3A8A",
+  "orientation": "portrait-primary",
+  "background_color": "#FFFFFF",
   "theme_color": "#1E3A8A",
-  "orientation": "portrait",
+  "prefer_related_applications": false,
   "icons": [
     {
       "src": "icon-192.png",
@@ -43,4 +45,3 @@
     }
   ]
 }
-

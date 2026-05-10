@@ -1,202 +1,258 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="id">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, viewport-fit=cover"
+    />
+    <meta
+      name="description"
+      content="Aplikasi pencatatan dan pengingat servis kendaraan dengan notifikasi real-time"
+    />
+    <meta name="theme-color" content="#1E3A8A" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <meta name="apple-mobile-web-app-title" content="AutoLog" />
     <title>AutoLog / ServisKu - Car Maintenance Tracker</title>
-    <link rel="manifest" href="manifest.json">
-    <meta name="theme-color" content="#1E3A8A">
-    <link rel="apple-touch-icon" href="icon-512.png">
-    <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="manifest" href="manifest.json" />
+    <link rel="icon" type="image/svg+xml" href="icon.svg" />
+    <link rel="apple-touch-icon" href="icon-512.png" />
+    <link rel="stylesheet" href="styles.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-</head>
-<body>
+  </head>
+  <body>
     <div class="mesh-background"></div>
     <div class="app-container">
-        <!-- Header -->
-        <header class="top-header glass">
-            <div class="header-left">
-                <i class="ph-fill ph-car-profile logo-icon"></i>
-                <div class="header-titles">
-                    <h1>AutoLog <span class="subtitle">/ ServisKu</span></h1>
-                    <h2 class="vehicle-info" id="vehicleInfo" contenteditable="true" title="Click to edit vehicle name">Suzuki Ertiga 2013</h2>
-                </div>
-            </div>
-            <div class="header-actions">
-                <button class="icon-btn mobile-only-btn" id="headerAddBtn" title="Tambah Data">
-                    <i class="ph ph-plus-circle"></i>
-                </button>
-                <button class="icon-btn" id="notifToggle" title="Aktifkan Notifikasi">
-                    <i class="ph ph-bell-slash"></i>
-                </button>
-                <button class="icon-btn" title="Settings">
-                    <i class="ph ph-gear"></i>
-                </button>
-                <div class="user-profile">
-                    <i class="ph-fill ph-user-circle"></i>
-                </div>
-            </div>
-        </header>
-
-        <!-- Main Content -->
-        <main class="main-content">
-            <!-- Dashboard Overview -->
-            <section class="dashboard-overview">
-                <div class="summary-card glass">
-                    <div class="card-icon"><i class="ph ph-gauge"></i></div>
-                    <div class="card-info">
-                        <h3>Total KM</h3>
-                        <p id="summaryTotalKm">0</p>
-                    </div>
-                </div>
-                <div class="summary-card glass">
-                    <div class="card-icon"><i class="ph ph-calendar-check"></i></div>
-                    <div class="card-info">
-                        <h3>Last Service</h3>
-                        <p id="summaryLastService">-</p>
-                    </div>
-                </div>
-                <div class="summary-card glass" id="upcomingCard">
-                    <div class="card-icon"><i class="ph ph-warning-circle"></i></div>
-                    <div class="card-info">
-                        <h3>Upcoming Alert</h3>
-                        <p id="summaryUpcomingService">-</p>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Maintenance Log Table -->
-            <section class="log-section glass">
-                <div class="log-header">
-                    <h2>Maintenance Log</h2>
-                    <button class="btn-primary desktop-add-btn" id="desktopAddBtn">
-                        <i class="ph ph-plus-bold"></i> New Record
-                    </button>
-                </div>
-                
-                <div class="log-controls">
-                    <div class="search-box">
-                        <i class="ph ph-magnifying-glass"></i>
-                        <input type="text" id="searchInput" placeholder="Search by notes...">
-                    </div>
-                    <div class="filter-group">
-                        <button class="filter-btn active" data-filter="all">All</button>
-                        <button class="filter-btn" data-filter="P1">P1: Aki</button>
-                        <button class="filter-btn" data-filter="P2">P2: Servis Rutin</button>
-                        <button class="filter-btn" data-filter="P3">P3: Lain-lain</button>
-                    </div>
-                </div>
-
-                <div class="table-responsive">
-                    <table id="logTable">
-                        <thead>
-                            <tr>
-                                <th>No</th>
-                                <th class="sortable" data-sort="tanggal">Tanggal <i class="ph-bold ph-caret-up"></i></th>
-                                <th class="sortable" data-sort="tanggalKembali">Tanggal Kembali <i class="ph-bold ph-caret-up"></i></th>
-                                <th>Perawatan</th>
-                                <th class="sortable" data-sort="km">KM <i class="ph-bold ph-caret-up"></i></th>
-                                <th>Keterangan</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tableBody">
-                            <!-- Rows injected via JS -->
-                        </tbody>
-                    </table>
-                </div>
-                
-                <div id="emptyState" class="empty-state">
-                    <i class="ph ph-clipboard-text"></i>
-                    <p>No maintenance records found.</p>
-                </div>
-            </section>
-        </main>
-
-        <!-- Footer -->
-        <footer class="app-footer">
-            <p>&copy; 2026 AutoLog System. Version 1.0.0</p>
-        </footer>
-
-        <!-- Bottom Navigation (Mobile) -->
-        <nav class="bottom-nav glass">
-            <a href="#" class="nav-item active" data-nav="dashboard">
-                <i class="ph-fill ph-house"></i>
-                <span>Home</span>
-            </a>
-            <a href="#" class="nav-item" data-nav="logs">
-                <i class="ph-fill ph-list-bullets"></i>
-                <span>Logs</span>
-            </a>
-            <div class="nav-spacer"></div>
-            <a href="#" class="nav-item" data-nav="notifications">
-                <i class="ph-fill ph-bell"></i>
-                <span>Notif</span>
-            </a>
-            <a href="#" class="nav-item" data-nav="settings">
-                <i class="ph-fill ph-gear-six"></i>
-                <span>Menu</span>
-            </a>
-        </nav>
-
-        <!-- Floating Quick Add (Mobile) -->
-        <button class="floating-add-btn" id="mobileAddBtn">
-            <i class="ph ph-plus-bold"></i>
-        </button>
-
-        <!-- Add/Edit Modal -->
-        <div class="modal-overlay" id="recordModal">
-            <div class="modal-content glass-modal">
-                <div class="modal-header">
-                    <h2 id="modalTitle">Add New Record</h2>
-                    <button class="close-modal-btn" id="closeModalBtn" type="button"><i class="ph ph-x"></i></button>
-                </div>
-                <form id="recordForm" class="record-form">
-                    <input type="hidden" id="recordId">
-                    
-                    <div class="form-group">
-                        <label for="tanggal">Tanggal Service</label>
-                        <input type="date" id="tanggal" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="tanggalKembali">Tanggal Kembali (Next Service)</label>
-                        <input type="date" id="tanggalKembali" required>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="perawatan">Kategori Perawatan</label>
-                        <select id="perawatan" required>
-                            <option value="" disabled selected>Pilih kategori...</option>
-                            <option value="P1">P1: Aki</option>
-                            <option value="P2">P2: Servis Rutin</option>
-                            <option value="P3">P3: Lain-lain</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="km">Odometer (KM)</label>
-                        <div class="input-with-icon">
-                            <i class="ph ph-gauge"></i>
-                            <input type="text" id="km" inputmode="numeric" placeholder="15,000" required>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="keterangan">Keterangan</label>
-                        <textarea id="keterangan" rows="3" placeholder="Ganti oli mesin, cek rem..." required></textarea>
-                    </div>
-
-                    <div class="modal-footer">
-                        <button type="button" class="btn-secondary" id="cancelBtn">Batal</button>
-                        <button type="submit" class="btn-primary">Simpan Data</button>
-                    </div>
-                </form>
-            </div>
+      <!-- Header -->
+      <header class="top-header glass">
+        <div class="header-left">
+          <i class="ph-fill ph-car-profile logo-icon"></i>
+          <div class="header-titles">
+            <h1>AutoLog <span class="subtitle">/ ServisKu</span></h1>
+            <h2
+              class="vehicle-info"
+              id="vehicleInfo"
+              contenteditable="true"
+              title="Click to edit vehicle name"
+            >
+              Suzuki Ertiga 2013
+            </h2>
+          </div>
         </div>
+        <div class="header-actions">
+          <button
+            class="icon-btn mobile-only-btn"
+            id="headerAddBtn"
+            title="Tambah Data"
+          >
+            <i class="ph ph-plus-circle"></i>
+          </button>
+          <button class="icon-btn" id="notifToggle" title="Aktifkan Notifikasi">
+            <i class="ph ph-bell-slash"></i>
+          </button>
+          <button class="icon-btn" id="settingsBtn" title="Settings">
+            <i class="ph ph-gear"></i>
+          </button>
+          <div class="user-profile">
+            <i class="ph-fill ph-user-circle"></i>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Content -->
+      <main class="main-content">
+        <!-- Dashboard Overview -->
+        <section class="dashboard-overview">
+          <div class="summary-card glass">
+            <div class="card-icon"><i class="ph ph-gauge"></i></div>
+            <div class="card-info">
+              <h3>Total KM</h3>
+              <p id="summaryTotalKm">0</p>
+            </div>
+          </div>
+          <div class="summary-card glass">
+            <div class="card-icon"><i class="ph ph-calendar-check"></i></div>
+            <div class="card-info">
+              <h3>Last Service</h3>
+              <p id="summaryLastService">-</p>
+            </div>
+          </div>
+          <div class="summary-card glass" id="upcomingCard">
+            <div class="card-icon"><i class="ph ph-warning-circle"></i></div>
+            <div class="card-info">
+              <h3>Upcoming Alert</h3>
+              <p id="summaryUpcomingService">-</p>
+            </div>
+          </div>
+        </section>
+
+        <!-- Maintenance Log Table -->
+        <section class="log-section glass">
+          <div class="log-header">
+            <h2>Maintenance Log</h2>
+            <button class="btn-primary desktop-add-btn" id="desktopAddBtn">
+              <i class="ph ph-plus-bold"></i> New Record
+            </button>
+          </div>
+
+          <div class="log-controls">
+            <div class="search-box">
+              <i class="ph ph-magnifying-glass"></i>
+              <input
+                type="text"
+                id="searchInput"
+                placeholder="Search by notes..."
+              />
+            </div>
+            <div class="filter-group">
+              <button class="filter-btn active" data-filter="all">All</button>
+              <button class="filter-btn" data-filter="P1">P1: Aki</button>
+              <button class="filter-btn" data-filter="P2">
+                P2: Servis Rutin
+              </button>
+              <button class="filter-btn" data-filter="P3">P3: Lain-lain</button>
+            </div>
+          </div>
+
+          <div class="table-responsive">
+            <table id="logTable">
+              <thead>
+                <tr>
+                  <th>No</th>
+                  <th class="sortable" data-sort="tanggal">
+                    Tanggal <i class="ph-bold ph-caret-up"></i>
+                  </th>
+                  <th class="sortable" data-sort="tanggalKembali">
+                    Tanggal Kembali <i class="ph-bold ph-caret-up"></i>
+                  </th>
+                  <th>Perawatan</th>
+                  <th class="sortable" data-sort="km">
+                    KM <i class="ph-bold ph-caret-up"></i>
+                  </th>
+                  <th>Keterangan</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="tableBody">
+                <!-- Rows injected via JS -->
+              </tbody>
+            </table>
+          </div>
+
+          <div id="emptyState" class="empty-state">
+            <i class="ph ph-clipboard-text"></i>
+            <p>No maintenance records found.</p>
+          </div>
+        </section>
+      </main>
+
+      <!-- Footer -->
+      <footer class="app-footer">
+        <p>&copy; 2026 AutoLog System. Version 1.0.0</p>
+      </footer>
+
+      <!-- Bottom Navigation (Mobile) -->
+      <nav class="bottom-nav glass">
+        <a href="#" class="nav-item active" data-nav="dashboard">
+          <i class="ph-fill ph-house"></i>
+          <span>Home</span>
+        </a>
+        <a href="#" class="nav-item" data-nav="logs">
+          <i class="ph-fill ph-list-bullets"></i>
+          <span>Logs</span>
+        </a>
+        <div class="nav-spacer"></div>
+        <a href="#" class="nav-item" data-nav="notifications">
+          <i class="ph-fill ph-bell"></i>
+          <span>Notif</span>
+        </a>
+        <a href="#" class="nav-item" data-nav="settings">
+          <i class="ph-fill ph-gear-six"></i>
+          <span>Menu</span>
+        </a>
+      </nav>
+
+      <!-- Floating Quick Add (Mobile) -->
+      <button class="floating-add-btn" id="mobileAddBtn">
+        <i class="ph ph-plus-bold"></i>
+      </button>
+
+      <!-- Add/Edit Modal -->
+      <div class="modal-overlay" id="recordModal">
+        <div class="modal-content glass-modal">
+          <div class="modal-header">
+            <h2 id="modalTitle">Add New Record</h2>
+            <button class="close-modal-btn" id="closeModalBtn" type="button">
+              <i class="ph ph-x"></i>
+            </button>
+          </div>
+          <form id="recordForm" class="record-form">
+            <input type="hidden" id="recordId" />
+
+            <div class="form-group">
+              <label for="tanggal">Tanggal Service</label>
+              <input type="date" id="tanggal" required />
+            </div>
+
+            <div class="form-group">
+              <label for="tanggalKembali">Tanggal Kembali (Next Service)</label>
+              <input type="date" id="tanggalKembali" required />
+            </div>
+
+            <div class="form-group">
+              <label for="perawatan">Kategori Perawatan</label>
+              <select id="perawatan" required>
+                <option value="" disabled selected>Pilih kategori...</option>
+                <option value="P1">P1: Aki</option>
+                <option value="P2">P2: Servis Rutin</option>
+                <option value="P3">P3: Lain-lain</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="km">Odometer (KM)</label>
+              <div class="input-with-icon">
+                <i class="ph ph-gauge"></i>
+                <input
+                  type="text"
+                  id="km"
+                  inputmode="numeric"
+                  placeholder="15,000"
+                  required
+                />
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label for="keterangan">Keterangan</label>
+              <textarea
+                id="keterangan"
+                rows="3"
+                placeholder="Ganti oli mesin, cek rem..."
+                required
+              ></textarea>
+            </div>
+
+            <div class="modal-footer">
+              <button type="button" class="btn-secondary" id="cancelBtn">
+                Batal
+              </button>
+              <button type="submit" class="btn-primary">Simpan Data</button>
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
     <script type="module" src="app.js"></script>
-</body>
+  </body>
 </html>
