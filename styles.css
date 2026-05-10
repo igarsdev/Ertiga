@@ -214,6 +214,39 @@ textarea {
   color: var(--primary);
 }
 
+/* Install App Button */
+.install-app-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: linear-gradient(135deg, #10b981, #059669);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+}
+
+.install-app-btn:hover {
+  background: linear-gradient(135deg, #059669, #047857);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+.install-app-btn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3);
+}
+
+.install-app-btn i {
+  font-size: 16px;
+}
+
 @keyframes pulseNotif {
   0% {
     transform: scale(1);
@@ -1438,6 +1471,17 @@ div:where(.swal2-container) button:where(.swal2-styled).swal2-cancel:hover {
   }
   .user-profile i {
     font-size: 30px;
+  }
+
+  /* Mobile: Install button icon only */
+  .install-app-btn span {
+    display: none;
+  }
+
+  .install-app-btn {
+    padding: 8px 10px;
+    border-radius: 6px;
+    font-size: 12px;
   }
 
   /* Bottom Navigation - Pill Style */

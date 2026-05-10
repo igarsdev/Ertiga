@@ -71,6 +71,11 @@ function setupInstallPrompt() {
     e.preventDefault();
     deferredPrompt = e;
     console.log("Install prompt ready");
+    // Show install button in header when prompt is ready
+    const installBtn = document.getElementById("installAppHeaderBtn");
+    if (installBtn) {
+      installBtn.style.display = "flex";
+    }
   });
 }
 
@@ -211,6 +216,13 @@ function init() {
   // Capture PWA Install Prompt
   setupInstallPrompt();
   setupResponsiveHandlers();
+
+  // Install button in header
+  const installAppHeaderBtn = document.getElementById("installAppHeaderBtn");
+  if (installAppHeaderBtn) {
+    installAppHeaderBtn.addEventListener("click", installApp);
+  }
+
   document.getElementById("settingsBtn").addEventListener("click", () => {
     Swal.fire({
       title: "AutoLog Menu",
@@ -244,6 +256,24 @@ async function installApp() {
     const { outcome } = await deferredPrompt.userChoice;
     console.log(`User response to the install prompt: ${outcome}`);
     deferredPrompt = null;
+
+    // Hide install button after installation
+    const headerBtn = document.getElementById("installAppHeaderBtn");
+    if (headerBtn) {
+      headerBtn.style.display = "none";
+    }
+    const settingsBtn = document.getElementById("installAppBtn");
+    if (settingsBtn) {
+      settingsBtn.style.display = "none";
+    }
+
+    if (outcome === "accepted") {
+      Swal.fire(
+        "Berhasil!",
+        "Aplikasi berhasil diinstall. Anda sekarang bisa membuka AutoLog seperti aplikasi biasa.",
+        "success",
+      );
+    }
   }
 }
 
