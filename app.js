@@ -230,6 +230,10 @@ function init() {
         <div style="text-align: left; display: flex; flex-direction: column; gap: 10px;">
           <button onclick="window.scrollTo(0,0); Swal.close();" style="padding: 10px; border: 1px solid #ddd; border-radius: 8px; background: white; cursor: pointer;">Dashboard</button>
           <button onclick="document.querySelector('.log-section').scrollIntoView(); Swal.close();" style="padding: 10px; border: 1px solid #ddd; border-radius: 8px; background: white; cursor: pointer;">Maintenance Logs</button>
+          <button id="exportCsvBtn" onclick="Swal.close(); exportRecordsToCsv();" style="padding: 10px; border: 1px solid #ddd; border-radius: 8px; background: white; cursor: pointer;">Export CSV</button>
+          <button id="importJsonBtn" onclick="Swal.close(); importRecordsFromJson();" style="padding: 10px; border: 1px solid #ddd; border-radius: 8px; background: white; cursor: pointer;">Import JSON</button>
+          <button id="setCurrentKmBtn" onclick="Swal.close(); setCurrentKmPrompt();" style="padding: 10px; border: 1px solid #ddd; border-radius: 8px; background: white; cursor: pointer;">Set Current KM</button>
+          <button id="setKmIntervalBtn" onclick="Swal.close(); setKmIntervalPrompt();" style="padding: 10px; border: 1px solid #ddd; border-radius: 8px; background: white; cursor: pointer;">Set KM Interval</button>
           <button id="installAppBtn" onclick="installApp();" style="padding: 10px; border: 1px solid #ddd; border-radius: 8px; background: white; cursor: pointer; display: none;">Install App</button>
           <button onclick="location.reload()" style="padding: 10px; border: 1px solid #ddd; border-radius: 8px; background: white; cursor: pointer;">Refresh App</button>
           <div style="font-size: 0.8rem; color: #666; margin-top: 10px; text-align: center;">Version 1.0.2 • Build 2026</div>
@@ -277,6 +281,69 @@ async function installApp() {
   }
 }
 
+function escapeCsvValue(value) {
+  const text = String(value ?? "");
+  return `"${text.replace(/"/g, '""')}"`;
+}
+
+function exportRecordsToCsv() {
+  if (records.length === 0) {
+    Swal.fire({
+      icon: "info",
+      title: "Belum ada data",
+      text: "Tambahkan minimal satu riwayat servis sebelum mengekspor CSV.",
+    });
+    return;
+  }
+
+  const headers = [
+    "Tanggal Service",
+    "Tanggal Kembali",
+    "Kategori Perawatan",
+    "KM",
+    "Keterangan",
+  ];
+
+  const rows = records.map((record) => [
+    record.tanggal,
+    record.tanggalKembali,
+    getPerawatanLabel(record.perawatan),
+    record.km,
+    record.keterangan,
+  ]);
+
+  const csvContent = [headers, ...rows]
+    .map((row) => row.map(escapeCsvValue).join(","))
+    .join("\n");
+
+  const blob = new Blob(["\uFEFF" + csvContent], {
+    type: "text/csv;charset=utf-8;",
+  });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  const vehicleName = elements.vehicleInfo.textContent
+    .trim()
+    .replace(/[^a-z0-9]+/gi, "-")
+    .replace(/^-+|-+$/g, "");
+
+  link.href = url;
+  link.download = `autolog-${vehicleName || "backup"}-${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+
+  Swal.fire({
+    icon: "success",
+    title: "CSV diekspor",
+    text: "File backup data servis sudah diunduh.",
+    timer: 1800,
+    showConfirmButton: false,
+    toast: true,
+    position: "top-end",
+  });
+}
+
 // Fetch from Firebase
 async function fetchRecords() {
   try {
@@ -304,6 +371,7 @@ function initNotifications() {
   if (Notification.permission === "granted") {
     updateNotifIcon(true);
     checkUpcomingForNotif();
+    checkUpcomingForKmNotif();
   } else {
     updateNotifIcon(false);
   }
@@ -339,9 +407,93 @@ function requestNotificationPermission() {
         showConfirmButton: false,
       });
       checkUpcomingForNotif();
+      checkUpcomingForKmNotif();
     } else {
       updateNotifIcon(false);
     }
+  });
+}
+
+// KM-based notifications
+const DEFAULT_KM_INTERVAL = 5000; // default km between services
+const KM_WARNING_MARGIN = 200; // notify when within this km to next service
+
+function setCurrentKmPrompt() {
+  Swal.fire({
+    title: "Set Current Odometer (KM)",
+    input: "number",
+    inputLabel: "Masukkan nilai odometer saat ini:",
+    inputAttributes: { min: 0, step: 1 },
+    inputValue: localStorage.getItem("autolog_current_km") || "",
+    showCancelButton: true,
+  }).then((res) => {
+    if (res.isConfirmed) {
+      const v = parseInt(res.value, 10) || 0;
+      localStorage.setItem("autolog_current_km", String(v));
+      Swal.fire({
+        icon: "success",
+        title: "Tersimpan",
+        text: `Current KM disimpan: ${v}`,
+      });
+      renderTable();
+      checkUpcomingForKmNotif();
+    }
+  });
+}
+
+function setKmIntervalPrompt() {
+  Swal.fire({
+    title: "Set Default KM Interval",
+    input: "number",
+    inputLabel: "Masukkan interval KM untuk reminder (mis. 5000):",
+    inputAttributes: { min: 100, step: 50 },
+    inputValue:
+      localStorage.getItem("autolog_km_interval") ||
+      String(DEFAULT_KM_INTERVAL),
+    showCancelButton: true,
+  }).then((res) => {
+    if (res.isConfirmed) {
+      const v = parseInt(res.value, 10) || DEFAULT_KM_INTERVAL;
+      localStorage.setItem("autolog_km_interval", String(v));
+      Swal.fire({
+        icon: "success",
+        title: "Tersimpan",
+        text: `KM interval disimpan: ${v}`,
+      });
+      checkUpcomingForKmNotif();
+    }
+  });
+}
+
+function checkUpcomingForKmNotif() {
+  if (Notification.permission !== "granted") return;
+  const currentKm = parseInt(localStorage.getItem("autolog_current_km"), 10);
+  if (isNaN(currentKm)) return;
+  const kmInterval =
+    parseInt(localStorage.getItem("autolog_km_interval"), 10) ||
+    DEFAULT_KM_INTERVAL;
+  const todayStr = new Date().toDateString();
+
+  records.forEach((record) => {
+    const nextKm = (parseInt(record.km, 10) || 0) + kmInterval;
+    const diff = nextKm - currentKm;
+    if (diff <= KM_WARNING_MARGIN) {
+      const key = `notif_km_sent_${record.id}`;
+      const lastSent = localStorage.getItem(key);
+      if (lastSent !== todayStr) {
+        showKmNotification(record, nextKm, diff);
+        localStorage.setItem(key, todayStr);
+      }
+    }
+  });
+}
+
+function showKmNotification(record, nextKm, diff) {
+  const title = `Peringatan KM: ${getPerawatanLabel(record.perawatan)}`;
+  const body = `Next service at ${nextKm.toLocaleString()} KM (${diff <= 0 ? "due" : diff + " KM left"}). Last recorded: ${record.km.toLocaleString()} KM.`;
+  new Notification(title, {
+    body,
+    icon: "https://cdn-icons-png.flaticon.com/512/2991/2991148.png",
   });
 }
 
@@ -380,6 +532,114 @@ function showSystemNotification(record) {
   };
 
   new Notification(title, options);
+}
+
+// Calendar helpers: open Google Calendar or download .ics
+function formatDateToYYYYMMDD(dateString) {
+  const d = new Date(dateString);
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}${m}${day}`;
+}
+
+function addToCalendar(id) {
+  const record = records.find((r) => r.id === id);
+  if (!record) return;
+  const title = `${getPerawatanLabel(record.perawatan)} - ${elements.vehicleInfo.textContent.trim()}`;
+  const defaultTime = "09:00";
+  Swal.fire({
+    title: "Tambah ke Kalender",
+    html: `
+      <div style="text-align:left; display:flex; flex-direction:column; gap:8px;">
+        <div>Event: <strong>${title}</strong></div>
+        <div>Tanggal: <strong>${formatDate(record.tanggalKembali)}</strong></div>
+        <label for="calendarTime">Pilih waktu event:</label>
+        <input type="time" id="calendarTime" value="${defaultTime}" />
+      </div>
+    `,
+    showCancelButton: true,
+    showDenyButton: true,
+    confirmButtonText: "Google Calendar",
+    denyButtonText: "Download .ics",
+    cancelButtonText: "Batal",
+    didOpen: () => {
+      const input = document.getElementById("calendarTime");
+      if (input) input.focus();
+    },
+  }).then((res) => {
+    const timeInput = document.getElementById("calendarTime");
+    const time = timeInput && timeInput.value ? timeInput.value : defaultTime;
+    if (res.isConfirmed) {
+      openGoogleCalendarWithTime(title, record, time);
+    } else if (res.isDenied) {
+      downloadIcsWithTime(title, record, time);
+    }
+  });
+}
+
+function openGoogleCalendar(title, record) {
+  // fallback all-day event if no time provided
+  console.warn(
+    "openGoogleCalendar called without time - this should be called with time",
+  );
+}
+
+function openGoogleCalendarWithTime(title, record, time) {
+  // create local start and end Date objects
+  const localStart = new Date(`${record.tanggalKembali}T${time}:00`);
+  const localEnd = new Date(localStart.getTime() + 60 * 60 * 1000); // 1 hour
+
+  const startUtc =
+    localStart.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+  const endUtc =
+    localEnd.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+  const dates = `${startUtc}/${endUtc}`;
+  const details = record.keterangan || "";
+  const url = `https://www.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${dates}&details=${encodeURIComponent(details)}`;
+  window.open(url, "_blank");
+}
+
+function downloadIcsWithTime(title, record, time) {
+  const id = record.id;
+  const uid = `autolog-${id}@autolog.local`;
+  const dtstamp =
+    new Date().toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+
+  const localStart = new Date(`${record.tanggalKembali}T${time}:00`);
+  const localEnd = new Date(localStart.getTime() + 60 * 60 * 1000);
+
+  const startUtc =
+    localStart.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+  const endUtc =
+    localEnd.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+
+  const description = (record.keterangan || "").replace(/\r?\n/g, "\\n");
+
+  const ics = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//AutoLog//EN",
+    "BEGIN:VEVENT",
+    `UID:${uid}`,
+    `DTSTAMP:${dtstamp}`,
+    `DTSTART:${startUtc}`,
+    `DTEND:${endUtc}`,
+    `SUMMARY:${title}`,
+    `DESCRIPTION:${description}`,
+    "END:VEVENT",
+    "END:VCALENDAR",
+  ].join("\r\n");
+
+  const blob = new Blob([ics], { type: "text/calendar;charset=utf-8" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `autolog-event-${record.tanggalKembali}.ics`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
 }
 
 // WhatsApp Integration
@@ -656,6 +916,7 @@ function renderTable() {
                 <td data-label="Aksi">
                     <div class="actions">
                         <button class="action-btn wa-btn" onclick="sendToWhatsApp('${record.id}')" title="Kirim ke WhatsApp"><i class="ph ph-whatsapp-logo"></i></button>
+                        <button class="action-btn cal-btn" onclick="addToCalendar('${record.id}')" title="Add to Calendar"><i class="ph ph-calendar-plus"></i></button>
                         <button class="action-btn edit-btn" onclick="openModal('${record.id}')" title="Edit"><i class="ph ph-pencil-simple"></i></button>
                         <button class="action-btn delete-btn" onclick="deleteRecord('${record.id}')" title="Delete"><i class="ph ph-trash"></i></button>
                     </div>
@@ -678,9 +939,18 @@ function updateDashboardStats() {
     return;
   }
 
-  // Total KM (Max KM)
-  const maxKm = Math.max(...records.map((r) => r.km));
-  elements.summaryTotalKm.textContent = maxKm.toLocaleString("en-US");
+  // Total KM: prefer user-set current KM, fallback to max KM from records
+  const storedCurrentKm = parseInt(
+    localStorage.getItem("autolog_current_km"),
+    10,
+  );
+  if (!isNaN(storedCurrentKm) && storedCurrentKm > 0) {
+    elements.summaryTotalKm.textContent =
+      storedCurrentKm.toLocaleString("en-US");
+  } else {
+    const maxKm = Math.max(...records.map((r) => r.km));
+    elements.summaryTotalKm.textContent = maxKm.toLocaleString("en-US");
+  }
 
   // Last Service Date (Max Tanggal)
   const sortedByDateDesc = [...records].sort(
@@ -731,6 +1001,122 @@ window.openModal = openModal;
 window.deleteRecord = deleteRecord;
 window.sendToWhatsApp = sendToWhatsApp;
 window.installApp = installApp;
+window.exportRecordsToCsv = exportRecordsToCsv;
+window.importRecordsFromJson = importRecordsFromJson;
+
+// Trigger file input click for JSON import
+function importRecordsFromJson() {
+  const input = document.getElementById("importJsonInput");
+  if (!input) {
+    Swal.fire("Error", "Elemen input untuk import tidak ditemukan.", "error");
+    return;
+  }
+  input.value = null;
+  input.click();
+}
+
+// Handle selected file
+document.addEventListener("DOMContentLoaded", () => {
+  const input = document.getElementById("importJsonInput");
+  if (input) {
+    input.addEventListener("change", handleImportFile);
+  }
+});
+
+function handleImportFile(e) {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+  reader.onload = async (evt) => {
+    try {
+      const text = evt.target.result;
+      const data = JSON.parse(text);
+
+      // Accept either an array or object with records property
+      const items = Array.isArray(data)
+        ? data
+        : data.records || data.items || null;
+      if (!items || !Array.isArray(items) || items.length === 0) {
+        Swal.fire(
+          "Tidak valid",
+          "File JSON tidak berisi data yang valid.",
+          "error",
+        );
+        return;
+      }
+
+      // Basic validation and normalization
+      const normalized = items
+        .map((it) => {
+          return {
+            tanggal: it.tanggal || it.date || "",
+            tanggalKembali:
+              it.tanggalKembali || it.nextDate || it.tanggal_kembali || "",
+            perawatan: it.perawatan || it.category || "P3",
+            km: parseInt((it.km ?? it.kilometers ?? it.odometer) || 0, 10) || 0,
+            keterangan: it.keterangan || it.notes || "",
+          };
+        })
+        .filter((r) => r.tanggal && r.tanggalKembali);
+
+      if (normalized.length === 0) {
+        Swal.fire(
+          "Tidak valid",
+          "Tidak ada record yang memiliki tanggal service dan tanggal kembali.",
+          "error",
+        );
+        return;
+      }
+
+      const proceed = await Swal.fire({
+        title: "Konfirmasi Import",
+        html: `Akan mengimpor <strong>${normalized.length}</strong> record ke Cloud. Lanjutkan?`,
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonText: "Ya, impor",
+        cancelButtonText: "Batal",
+      });
+
+      if (!proceed.isConfirmed) return;
+
+      Swal.fire({
+        title: "Mengimpor...",
+        allowOutsideClick: false,
+        didOpen: () => {
+          Swal.showLoading();
+        },
+      });
+
+      // Upload each record to Firestore
+      const promises = normalized.map(async (rec) => {
+        const docRef = await addDoc(collection(db, "maintenance_logs"), rec);
+        records.push({ id: docRef.id, ...rec });
+      });
+
+      await Promise.all(promises);
+      renderTable();
+
+      Swal.fire({
+        icon: "success",
+        title: "Selesai",
+        text: `${normalized.length} record berhasil diimpor.`,
+        timer: 1800,
+        showConfirmButton: false,
+        toast: true,
+        position: "top-end",
+      });
+    } catch (err) {
+      console.error("Import error:", err);
+      Swal.fire(
+        "Error",
+        "Gagal mengimpor file JSON. Periksa formatnya.",
+        "error",
+      );
+    }
+  };
+  reader.readAsText(file, "utf-8");
+}
 
 // Run App
 document.addEventListener("DOMContentLoaded", init);
