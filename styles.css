@@ -646,24 +646,28 @@ tbody tr:hover td {
 }
 
 .badge-category {
-  padding: 6px 12px;
-  border-radius: 12px;
-  font-size: 0.75rem;
+  padding: 8px 14px;
+  border-radius: 14px;
+  font-size: 0.8rem;
   font-weight: 600;
   display: inline-block;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .cat-P1 {
-  background: #e0e7ff;
+  background: #eef2ff;
   color: #4338ca;
+  border: 1px solid #c7d2fe;
 }
 .cat-P2 {
-  background: #dcfce7;
+  background: #f0fdf4;
   color: #15803d;
+  border: 1px solid #bbf7d0;
 }
 .cat-P3 {
-  background: #f3f4f6;
+  background: #f9fafb;
   color: #4b5563;
+  border: 1px solid #e5e7eb;
 }
 
 /* Warning highlight */
@@ -1460,10 +1464,14 @@ div:where(.swal2-container) button:where(.swal2-styled).swal2-cancel:hover {
   }
 
   .header-titles h1 {
-    font-size: 1.1rem;
+    font-size: 1.2rem;
+    background: linear-gradient(135deg, var(--primary), var(--primary-light));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
   .vehicle-info {
-    font-size: 0.75rem;
+    font-size: 0.8rem;
+    opacity: 0.8;
   }
 
   .header-actions {
@@ -1563,16 +1571,24 @@ div:where(.swal2-container) button:where(.swal2-styled).swal2-cancel:hover {
   }
 
   .summary-card {
-    padding: 16px;
+    padding: 18px;
     gap: 16px;
+    flex-direction: row;
+    text-align: left;
+    border-radius: 20px;
   }
   .card-icon {
-    width: 50px;
-    height: 50px;
-    font-size: 24px;
+    width: 48px;
+    height: 48px;
+    font-size: 22px;
+    border-radius: 14px;
+  }
+  .card-info h3 {
+    font-size: 0.75rem;
+    margin-bottom: 2px;
   }
   .card-info p {
-    font-size: 1.25rem;
+    font-size: 1.3rem;
   }
 
   /* Card-based Table View */
@@ -1596,30 +1612,36 @@ div:where(.swal2-container) button:where(.swal2-styled).swal2-cancel:hover {
 
   #logTable tr {
     border: 1px solid var(--border);
-    border-radius: var(--border-radius-sm);
-    margin-bottom: 16px;
+    border-radius: 20px;
+    margin-bottom: 20px;
     background: white !important;
-    padding: 8px 0;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+    padding: 12px 0;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
     overflow: hidden;
+    position: relative;
   }
 
   #logTable td {
     border: none;
     position: relative;
-    padding: 12px 16px 12px 45%;
+    padding: 10px 16px 10px 45%;
     text-align: right;
-    min-height: 40px;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.03);
+    min-height: 44px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.02);
     background: transparent !important;
-    font-size: 0.85rem;
+    font-size: 0.9rem;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
   }
 
   #logTable td:last-child {
     border-bottom: none;
     display: flex;
-    justify-content: flex-end;
-    padding-top: 15px;
+    justify-content: center;
+    padding: 15px 16px;
+    background: rgba(30, 58, 138, 0.02) !important;
+    margin-top: 5px;
   }
 
   #logTable td::before {
@@ -1630,28 +1652,32 @@ div:where(.swal2-container) button:where(.swal2-styled).swal2-cancel:hover {
     text-align: left;
     font-weight: 600;
     color: var(--text-muted);
-    font-size: 0.75rem;
+    font-size: 0.7rem;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
-    white-space: nowrap;
+    letter-spacing: 0.8px;
   }
 
   .actions {
-    gap: 15px;
+    gap: 12px;
+    width: 100%;
+    justify-content: space-around;
   }
   .action-btn {
-    width: 42px;
-    height: 42px;
-    background: #f1f5f9;
-    border-radius: 10px;
+    width: 44px;
+    height: 44px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
   }
 
   #logTable .row-warning {
     background: linear-gradient(
       135deg,
-      rgba(254, 243, 199, 0.4),
+      rgba(254, 243, 199, 0.3),
       white
     ) !important;
-    border-left: 5px solid var(--accent) !important;
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    border-left: 6px solid var(--accent) !important;
   }
 }

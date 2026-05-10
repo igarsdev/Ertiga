@@ -39,7 +39,7 @@
         <div class="header-left">
           <i class="ph-fill ph-car-profile logo-icon"></i>
           <div class="header-titles">
-            <h1>AutoLog <span class="subtitle">/ ServisKu</span></h1>
+            <h1>AutoLog <span class="subtitle">| ServisKu</span></h1>
             <h2
               class="vehicle-info"
               id="vehicleInfo"
@@ -54,7 +54,7 @@
           <button
             class="icon-btn mobile-only-btn"
             id="headerAddBtn"
-            title="Tambah Data"
+            title="Tambah Catatan"
           >
             <i class="ph ph-plus-circle"></i>
           </button>
@@ -86,21 +86,21 @@
           <div class="summary-card glass">
             <div class="card-icon"><i class="ph ph-gauge"></i></div>
             <div class="card-info">
-              <h3>Total KM</h3>
+              <h3>Total Odometer</h3>
               <p id="summaryTotalKm">0</p>
             </div>
           </div>
           <div class="summary-card glass">
             <div class="card-icon"><i class="ph ph-calendar-check"></i></div>
             <div class="card-info">
-              <h3>Last Service</h3>
+              <h3>Servis Terakhir</h3>
               <p id="summaryLastService">-</p>
             </div>
           </div>
           <div class="summary-card glass" id="upcomingCard">
             <div class="card-icon"><i class="ph ph-warning-circle"></i></div>
             <div class="card-info">
-              <h3>Upcoming Alert</h3>
+              <h3>Jadwal Berikutnya</h3>
               <p id="summaryUpcomingService">-</p>
             </div>
           </div>
@@ -109,9 +109,8 @@
         <!-- Maintenance Log Table -->
         <section class="log-section glass">
           <div class="log-header">
-            <h2>Maintenance Log</h2>
-            <button class="btn-primary desktop-add-btn" id="desktopAddBtn">
-              <i class="ph ph-plus-bold"></i> New Record
+            <h2>Riwayat Perawatan</h2>
+              <i class="ph ph-plus-bold"></i> Tambah Data
             </button>
           </div>
 
@@ -121,7 +120,7 @@
               <input
                 type="text"
                 id="searchInput"
-                placeholder="Search by notes..."
+                placeholder="Cari catatan servis..."
               />
             </div>
             <div class="filter-group">
@@ -150,7 +149,7 @@
                     KM <i class="ph-bold ph-caret-up"></i>
                   </th>
                   <th>Keterangan</th>
-                  <th>Actions</th>
+                  <th>Aksi</th>
                 </tr>
               </thead>
               <tbody id="tableBody">
@@ -161,7 +160,7 @@
 
           <div id="emptyState" class="empty-state">
             <i class="ph ph-clipboard-text"></i>
-            <p>No maintenance records found.</p>
+            <p>Belum ada riwayat perawatan.</p>
           </div>
         </section>
       </main>
@@ -175,11 +174,11 @@
       <nav class="bottom-nav glass">
         <a href="#" class="nav-item active" data-nav="dashboard">
           <i class="ph-fill ph-house"></i>
-          <span>Home</span>
+          <span>Beranda</span>
         </a>
         <a href="#" class="nav-item" data-nav="logs">
           <i class="ph-fill ph-list-bullets"></i>
-          <span>Logs</span>
+          <span>Riwayat</span>
         </a>
         <div class="nav-spacer"></div>
         <a href="#" class="nav-item" data-nav="notifications">
@@ -201,7 +200,7 @@
       <div class="modal-overlay" id="recordModal">
         <div class="modal-content glass-modal">
           <div class="modal-header">
-            <h2 id="modalTitle">Add New Record</h2>
+            <h2 id="modalTitle">Tambah Catatan Baru</h2>
             <button class="close-modal-btn" id="closeModalBtn" type="button">
               <i class="ph ph-x"></i>
             </button>

@@ -228,15 +228,15 @@ function init() {
       title: "AutoLog Menu",
       html: `
         <div style="text-align: left; display: flex; flex-direction: column; gap: 10px;">
-          <button onclick="window.scrollTo(0,0); Swal.close();" style="padding: 10px; border: 1px solid #ddd; border-radius: 8px; background: white; cursor: pointer;">Dashboard</button>
-          <button onclick="document.querySelector('.log-section').scrollIntoView(); Swal.close();" style="padding: 10px; border: 1px solid #ddd; border-radius: 8px; background: white; cursor: pointer;">Maintenance Logs</button>
-          <button id="exportCsvBtn" onclick="Swal.close(); exportRecordsToCsv();" style="padding: 10px; border: 1px solid #ddd; border-radius: 8px; background: white; cursor: pointer;">Export CSV</button>
-          <button id="importJsonBtn" onclick="Swal.close(); importRecordsFromJson();" style="padding: 10px; border: 1px solid #ddd; border-radius: 8px; background: white; cursor: pointer;">Import JSON</button>
-          <button id="setCurrentKmBtn" onclick="Swal.close(); setCurrentKmPrompt();" style="padding: 10px; border: 1px solid #ddd; border-radius: 8px; background: white; cursor: pointer;">Set Current KM</button>
-          <button id="setKmIntervalBtn" onclick="Swal.close(); setKmIntervalPrompt();" style="padding: 10px; border: 1px solid #ddd; border-radius: 8px; background: white; cursor: pointer;">Set KM Interval</button>
-          <button id="installAppBtn" onclick="installApp();" style="padding: 10px; border: 1px solid #ddd; border-radius: 8px; background: white; cursor: pointer; display: none;">Install App</button>
-          <button onclick="location.reload()" style="padding: 10px; border: 1px solid #ddd; border-radius: 8px; background: white; cursor: pointer;">Refresh App</button>
-          <div style="font-size: 0.8rem; color: #666; margin-top: 10px; text-align: center;">Version 1.0.2 • Build 2026</div>
+          <button onclick="window.scrollTo(0,0); Swal.close();" style="padding: 12px; border: 1px solid #eee; border-radius: 12px; background: #f8fafc; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 10px;"><i class="ph ph-layout"></i> Dashboard</button>
+          <button onclick="document.querySelector('.log-section').scrollIntoView(); Swal.close();" style="padding: 12px; border: 1px solid #eee; border-radius: 12px; background: #f8fafc; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 10px;"><i class="ph ph-clock-counter-clockwise"></i> Riwayat Servis</button>
+          <button id="exportCsvBtn" onclick="Swal.close(); exportRecordsToCsv();" style="padding: 12px; border: 1px solid #eee; border-radius: 12px; background: #f8fafc; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 10px;"><i class="ph ph-file-csv"></i> Ekspor CSV (Backup)</button>
+          <button id="importJsonBtn" onclick="Swal.close(); importRecordsFromJson();" style="padding: 12px; border: 1px solid #eee; border-radius: 12px; background: #f8fafc; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 10px;"><i class="ph ph-file-arrow-up"></i> Impor JSON</button>
+          <button id="setCurrentKmBtn" onclick="Swal.close(); setCurrentKmPrompt();" style="padding: 12px; border: 1px solid #eee; border-radius: 12px; background: #f8fafc; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 10px;"><i class="ph ph-gauge"></i> Atur Odometer Saat Ini</button>
+          <button id="setKmIntervalBtn" onclick="Swal.close(); setKmIntervalPrompt();" style="padding: 12px; border: 1px solid #eee; border-radius: 12px; background: #f8fafc; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 10px;"><i class="ph ph-arrows-left-right"></i> Atur Interval Servis</button>
+          <button id="installAppBtn" onclick="installApp();" style="padding: 12px; border: 1px solid #eee; border-radius: 12px; background: #10b981; color: white; cursor: pointer; font-weight: 600; display: none; align-items: center; gap: 10px;"><i class="ph ph-download-simple"></i> Install Aplikasi</button>
+          <button onclick="location.reload()" style="padding: 12px; border: 1px solid #eee; border-radius: 12px; background: #f8fafc; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 10px;"><i class="ph ph-refresh"></i> Refresh Halaman</button>
+          <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 15px; text-align: center; border-top: 1px solid #f1f5f9; padding-top: 10px;">AutoLog v1.0.5 • Build 2026</div>
         </div>
       `,
       showConfirmButton: false,
@@ -673,7 +673,7 @@ function openModal(editId = null) {
   if (editId) {
     const record = records.find((r) => r.id === editId);
     if (record) {
-      elements.modalTitle.textContent = "Edit Record";
+      elements.modalTitle.textContent = "Edit Catatan";
       elements.recordId.value = record.id;
       elements.tanggal.value = record.tanggal;
       elements.tanggalKembali.value = record.tanggalKembali;
@@ -682,7 +682,7 @@ function openModal(editId = null) {
       elements.keterangan.value = record.keterangan;
     }
   } else {
-    elements.modalTitle.textContent = "Add New Record";
+    elements.modalTitle.textContent = "Tambah Catatan Baru";
     elements.recordForm.reset();
     elements.recordId.value = "";
 
