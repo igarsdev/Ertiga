@@ -1,16 +1,15 @@
-const CACHE_NAME = "autolog-v3";
-const RUNTIME_CACHE = "autolog-runtime-v3";
+const CACHE_NAME = "autolog-v5";
+const RUNTIME_CACHE = "autolog-runtime-v5";
 const urlsToCache = [
   "./",
   "./index.html",
   "./styles.css",
   "./app.js",
   "./manifest.json",
-  "./icon.svg",
   "./icon-192.png",
   "./icon-512.png",
   "./icon-maskable.png",
-  "./screenshot-mobile.png",
+  "./icon.svg",
   "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap",
   "https://unpkg.com/@phosphor-icons/web",
   "https://cdn.jsdelivr.net/npm/sweetalert2@11",

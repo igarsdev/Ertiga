@@ -735,6 +735,12 @@ tbody tr:hover td {
   border-color: #bbf7d0;
 }
 
+.cal-btn:hover {
+  background: #dbeafe;
+  color: #2563eb;
+  border-color: #bfdbfe;
+}
+
 .empty-state {
   display: none;
   text-align: center;
