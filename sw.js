@@ -1,10 +1,15 @@
-const CACHE_NAME = 'autolog-v1';
+const CACHE_NAME = 'autolog-v2';
 const urlsToCache = [
   './',
   './index.html',
   './styles.css',
   './app.js',
-  './icon.svg'
+  './manifest.json',
+  './icon.svg',
+  './icon-192.png',
+  './icon-512.png',
+  './icon-maskable.png',
+  './screenshot-mobile.png'
 ];
 
 self.addEventListener('install', event => {

@@ -6,7 +6,7 @@
     <title>AutoLog / ServisKu - Car Maintenance Tracker</title>
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#1E3A8A">
-    <link rel="apple-touch-icon" href="icon.svg">
+    <link rel="apple-touch-icon" href="icon-512.png">
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
@@ -24,7 +24,7 @@
                     <h2 class="vehicle-info" id="vehicleInfo" contenteditable="true" title="Click to edit vehicle name">Suzuki Ertiga 2013</h2>
                 </div>
             </div>
-            <div class="header-right">
+            <div class="header-actions">
                 <button class="icon-btn" id="notifToggle" title="Aktifkan Notifikasi">
                     <i class="ph ph-bell-slash"></i>
                 </button>
@@ -116,6 +116,27 @@
         <footer class="app-footer">
             <p>&copy; 2026 AutoLog System. Version 1.0.0</p>
         </footer>
+
+        <!-- Bottom Navigation (Mobile) -->
+        <nav class="bottom-nav glass">
+            <a href="#" class="nav-item active" data-nav="dashboard">
+                <i class="ph-fill ph-house"></i>
+                <span>Home</span>
+            </a>
+            <a href="#" class="nav-item" data-nav="logs">
+                <i class="ph-fill ph-list-bullets"></i>
+                <span>Logs</span>
+            </a>
+            <div class="nav-spacer"></div>
+            <a href="#" class="nav-item" data-nav="notifications">
+                <i class="ph-fill ph-bell"></i>
+                <span>Notif</span>
+            </a>
+            <a href="#" class="nav-item" data-nav="settings">
+                <i class="ph-fill ph-gear-six"></i>
+                <span>Menu</span>
+            </a>
+        </nav>
 
         <!-- Floating Quick Add (Mobile) -->
         <button class="floating-add-btn" id="mobileAddBtn">

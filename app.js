@@ -41,6 +41,14 @@ const elements = {
     cancelBtn: document.getElementById('cancelBtn'),
     recordForm: document.getElementById('recordForm'),
     modalTitle: document.getElementById('modalTitle'),
+    navItems: document.querySelectorAll('.nav-item'),
+    sections: {
+        dashboard: document.querySelector('.dashboard-overview'),
+        logs: document.querySelector('.log-section')
+    }
+};
+
+let deferredPrompt;
     
     // Form Inputs
     recordId: document.getElementById('recordId'),
@@ -111,6 +119,48 @@ function init() {
             updateSortHeaders();
             renderTable();
         });
+    });
+
+    // Bottom Nav Navigation
+    elements.navItems.forEach(item => {
+        item.addEventListener('click', (e) => {
+            e.preventDefault();
+            const target = item.dataset.nav;
+            
+            elements.navItems.forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
+
+            if (target === 'dashboard') {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            } else if (target === 'logs') {
+                elements.sections.logs.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            } else if (target === 'notifications') {
+                requestNotificationPermission();
+            } else if (target === 'settings') {
+                Swal.fire({
+                    title: 'AutoLog Menu',
+                    html: `
+                        <div style="text-align: left; display: flex; flex-direction: column; gap: 10px;">
+                            <button onclick="window.scrollTo(0,0); Swal.close();" style="padding: 10px; border: 1px solid #ddd; border-radius: 8px; background: white; cursor: pointer;">Dashboard</button>
+                            <button onclick="document.querySelector('.log-section').scrollIntoView(); Swal.close();" style="padding: 10px; border: 1px solid #ddd; border-radius: 8px; background: white; cursor: pointer;">Maintenance Logs</button>
+                            <button onclick="location.reload()" style="padding: 10px; border: 1px solid #ddd; border-radius: 8px; background: white; cursor: pointer;">Refresh App</button>
+                            <div style="font-size: 0.8rem; color: #666; margin-top: 10px; text-align: center;">Version 1.0.2 • Build 2026</div>
+                        </div>
+                    `,
+                    showConfirmButton: false,
+                    showCloseButton: true
+                });
+            }
+        });
+    });
+
+    // Capture PWA Install Prompt
+    window.addEventListener('beforeinstallprompt', (e) => {
+        e.preventDefault();
+        deferredPrompt = e;
+        console.log('Capture beforeinstallprompt');
+        
+        // Optionally show an install button in settings or header
     });
 
     // Initial Render
