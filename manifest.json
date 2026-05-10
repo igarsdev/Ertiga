@@ -1,0 +1,17 @@
+{
+  "name": "AutoLog / ServisKu",
+  "short_name": "AutoLog",
+  "description": "Aplikasi pencatatan dan pengingat servis kendaraan",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#1E3A8A",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
