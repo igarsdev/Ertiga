@@ -1,5 +1,21 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+import { getFirestore, collection, addDoc, getDocs, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBC56I3l9qKHzvP6EhBvwnwl7qAKXaaL6g",
+  authDomain: "ertiga-2c823.firebaseapp.com",
+  projectId: "ertiga-2c823",
+  storageBucket: "ertiga-2c823.firebasestorage.app",
+  messagingSenderId: "499478581885",
+  appId: "1:499478581885:web:34e4174c369d2da1f19714",
+  measurementId: "G-J3KWSJLXEY"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
 // Data State
-let records = JSON.parse(localStorage.getItem('autolog_records')) || [];
+let records = [];
 let currentFilter = 'all';
 let currentSearch = '';
 let currentSort = { column: 'tanggal', order: 'desc' };
@@ -98,9 +114,24 @@ function init() {
     });
 
     // Initial Render
-    updateSortHeaders();
-    renderTable();
-    initNotifications();
+    fetchRecords();
+}
+
+// Fetch from Firebase
+async function fetchRecords() {
+    try {
+        const querySnapshot = await getDocs(collection(db, "maintenance_logs"));
+        records = querySnapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+        updateSortHeaders();
+        renderTable();
+        initNotifications();
+    } catch (error) {
+        console.error("Error fetching records: ", error);
+        Swal.fire('Error', 'Gagal memuat data dari database.', 'error');
+    }
 }
 
 // Notification Logic
@@ -258,7 +289,7 @@ function closeModal() {
 }
 
 // Form Submit Handler
-function handleFormSubmit(e) {
+async function handleFormSubmit(e) {
     e.preventDefault();
     
     const id = elements.recordId.value;
@@ -272,34 +303,45 @@ function handleFormSubmit(e) {
         keterangan: elements.keterangan.value
     };
 
-    if (id) {
-        // Edit
-        const index = records.findIndex(r => r.id === parseInt(id));
-        if (index !== -1) {
-            records[index] = { ...records[index], ...recordData };
-        }
-    } else {
-        // Add
-        const newRecord = {
-            id: Date.now(),
-            ...recordData
-        };
-        records.push(newRecord);
-    }
+    try {
+        // Show loading state
+        Swal.fire({
+            title: 'Menyimpan...',
+            allowOutsideClick: false,
+            didOpen: () => { Swal.showLoading() }
+        });
 
-    saveAndRender();
-    checkUpcomingForNotif();
-    closeModal();
-    
-    Swal.fire({
-        icon: 'success',
-        title: 'Tersimpan!',
-        text: 'Data perawatan berhasil disimpan.',
-        timer: 1500,
-        showConfirmButton: false,
-        toast: true,
-        position: 'top-end'
-    });
+        if (id) {
+            // Edit
+            const docRef = doc(db, "maintenance_logs", id);
+            await updateDoc(docRef, recordData);
+            const index = records.findIndex(r => r.id === id);
+            if (index !== -1) {
+                records[index] = { id, ...recordData };
+            }
+        } else {
+            // Add
+            const docRef = await addDoc(collection(db, "maintenance_logs"), recordData);
+            records.push({ id: docRef.id, ...recordData });
+        }
+
+        renderTable();
+        checkUpcomingForNotif();
+        closeModal();
+        
+        Swal.fire({
+            icon: 'success',
+            title: 'Tersimpan!',
+            text: 'Data perawatan berhasil disimpan ke Cloud.',
+            timer: 1500,
+            showConfirmButton: false,
+            toast: true,
+            position: 'top-end'
+        });
+    } catch (error) {
+        console.error("Error saving record: ", error);
+        Swal.fire('Error', 'Gagal menyimpan data.', 'error');
+    }
 }
 
 // Delete Record
@@ -313,27 +355,34 @@ function deleteRecord(id) {
         cancelButtonColor: '#64748b',
         confirmButtonText: 'Ya, Hapus!',
         cancelButtonText: 'Batal'
-    }).then((result) => {
+    }).then(async (result) => {
         if (result.isConfirmed) {
-            records = records.filter(r => r.id !== id);
-            saveAndRender();
-            Swal.fire({
-                icon: 'success',
-                title: 'Terhapus!',
-                text: 'Data telah dihapus.',
-                timer: 1500,
-                showConfirmButton: false,
-                toast: true,
-                position: 'top-end'
-            });
+            try {
+                Swal.fire({
+                    title: 'Menghapus...',
+                    allowOutsideClick: false,
+                    didOpen: () => { Swal.showLoading() }
+                });
+
+                await deleteDoc(doc(db, "maintenance_logs", id));
+                records = records.filter(r => r.id !== id);
+                renderTable();
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Terhapus!',
+                    text: 'Data telah dihapus dari Cloud.',
+                    timer: 1500,
+                    showConfirmButton: false,
+                    toast: true,
+                    position: 'top-end'
+                });
+            } catch (error) {
+                console.error("Error deleting record: ", error);
+                Swal.fire('Error', 'Gagal menghapus data.', 'error');
+            }
         }
     });
-}
-
-// Save & Update UI
-function saveAndRender() {
-    localStorage.setItem('autolog_records', JSON.stringify(records));
-    renderTable();
 }
 
 // Helper: Check if date is within next 14 days
@@ -434,9 +483,9 @@ function renderTable() {
                 <td>${record.keterangan}</td>
                 <td>
                     <div class="actions">
-                        <button class="action-btn wa-btn" onclick="sendToWhatsApp(${record.id})" title="Kirim ke WhatsApp"><i class="ph ph-whatsapp-logo"></i></button>
-                        <button class="action-btn edit-btn" onclick="openModal(${record.id})" title="Edit"><i class="ph ph-pencil-simple"></i></button>
-                        <button class="action-btn delete-btn" onclick="deleteRecord(${record.id})" title="Delete"><i class="ph ph-trash"></i></button>
+                        <button class="action-btn wa-btn" onclick="sendToWhatsApp('${record.id}')" title="Kirim ke WhatsApp"><i class="ph ph-whatsapp-logo"></i></button>
+                        <button class="action-btn edit-btn" onclick="openModal('${record.id}')" title="Edit"><i class="ph ph-pencil-simple"></i></button>
+                        <button class="action-btn delete-btn" onclick="deleteRecord('${record.id}')" title="Delete"><i class="ph ph-trash"></i></button>
                     </div>
                 </td>
             `;
