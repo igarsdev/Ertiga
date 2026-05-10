@@ -82,6 +82,7 @@ function init() {
     // Event Listeners
     elements.desktopAddBtn.addEventListener('click', () => openModal());
     elements.mobileAddBtn.addEventListener('click', () => openModal());
+    document.getElementById('headerAddBtn').addEventListener('click', () => openModal());
     elements.notifToggle.addEventListener('click', requestNotificationPermission);
     elements.closeModalBtn.addEventListener('click', closeModal);
     elements.cancelBtn.addEventListener('click', closeModal);
@@ -522,16 +523,16 @@ function renderTable() {
             if (isWarning) tr.classList.add('row-warning');
             
             tr.innerHTML = `
-                <td>${index + 1}</td>
-                <td>${formatDate(record.tanggal)}</td>
-                <td>
+                <td data-label="No">${index + 1}</td>
+                <td data-label="Tanggal">${formatDate(record.tanggal)}</td>
+                <td data-label="Kembali">
                     ${formatDate(record.tanggalKembali)}
                     ${isWarning ? '<span class="warning-badge"><i class="ph-fill ph-warning-circle"></i> Segera</span>' : ''}
                 </td>
-                <td><span class="badge-category cat-${record.perawatan}">${getPerawatanLabel(record.perawatan)}</span></td>
-                <td>${record.km.toLocaleString('en-US')}</td>
-                <td>${record.keterangan}</td>
-                <td>
+                <td data-label="Perawatan"><span class="badge-category cat-${record.perawatan}">${getPerawatanLabel(record.perawatan)}</span></td>
+                <td data-label="KM">${record.km.toLocaleString('en-US')}</td>
+                <td data-label="Keterangan">${record.keterangan}</td>
+                <td data-label="Aksi">
                     <div class="actions">
                         <button class="action-btn wa-btn" onclick="sendToWhatsApp('${record.id}')" title="Kirim ke WhatsApp"><i class="ph ph-whatsapp-logo"></i></button>
                         <button class="action-btn edit-btn" onclick="openModal('${record.id}')" title="Edit"><i class="ph ph-pencil-simple"></i></button>
