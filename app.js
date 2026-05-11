@@ -7,6 +7,7 @@ import {
   updateDoc,
   deleteDoc,
   doc,
+  enableIndexedDbPersistence,
 } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -21,6 +22,15 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+
+// Enable Offline Persistence for Mobile Stability
+enableIndexedDbPersistence(db).catch((err) => {
+  if (err.code == "failed-precondition") {
+    console.warn("Multiple tabs open, persistence can only be enabled in one tab at a time.");
+  } else if (err.code == "unimplemented") {
+    console.warn("The current browser doesn't support all of the features required to enable persistence");
+  }
+});
 
 // Data State
 let records = [];
@@ -455,7 +465,28 @@ async function fetchRecords() {
     initNotifications();
   } catch (error) {
     console.error("Error fetching records: ", error);
-    Swal.fire("Error", "Gagal memuat data dari database.", "error");
+
+    let errorMsg = "Gagal memuat data dari database.";
+    if (error.code === "permission-denied") {
+      errorMsg = "Izin ditolak oleh server. Silakan hubungi admin.";
+    } else if (error.code === "unavailable") {
+      errorMsg =
+        "Layanan database tidak tersedia (sedang offline). Periksa internet Anda.";
+    }
+
+    Swal.fire({
+      icon: "error",
+      title: "Error",
+      text: errorMsg,
+      showCancelButton: true,
+      confirmButtonText: "Coba Lagi",
+      cancelButtonText: "Tutup",
+      confirmButtonColor: "#3b82f6",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        fetchRecords();
+      }
+    });
   }
 }
 
