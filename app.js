@@ -1043,10 +1043,25 @@ function renderTable() {
                 <td data-label="Keterangan">${record.keterangan}</td>
                 <td data-label="Aksi">
                     <div class="actions">
-                        <button class="action-btn wa-btn" onclick="sendToWhatsApp('${record.id}')" title="Kirim ke WhatsApp"><i class="ph ph-whatsapp-logo"></i></button>
-                        <button class="action-btn cal-btn" onclick="addToCalendar('${record.id}')" title="Add to Calendar"><i class="ph ph-calendar-plus"></i></button>
-                        <button class="action-btn edit-btn" onclick="openModal('${record.id}')" title="Edit"><i class="ph ph-pencil-simple"></i></button>
-                        <button class="action-btn delete-btn" onclick="deleteRecord('${record.id}')" title="Delete"><i class="ph ph-trash"></i></button>
+                        <div class="dropdown">
+                            <button class="dropdown-btn" onclick="toggleDropdown(event, '${record.id}')">
+                                <i class="ph ph-dots-three-outline-vertical-fill"></i>
+                            </button>
+                            <div id="dropdown-${record.id}" class="dropdown-content">
+                                <button class="dropdown-item" onclick="sendToWhatsApp('${record.id}')">
+                                    <i class="ph ph-whatsapp-logo" style="color: #16a34a;"></i> WhatsApp
+                                </button>
+                                <button class="dropdown-item" onclick="addToCalendar('${record.id}')">
+                                    <i class="ph ph-calendar-plus" style="color: #2563eb;"></i> Kalender
+                                </button>
+                                <button class="dropdown-item" onclick="openModal('${record.id}')">
+                                    <i class="ph ph-pencil-simple" style="color: #4338ca;"></i> Edit Data
+                                </button>
+                                <button class="dropdown-item delete" onclick="deleteRecord('${record.id}')">
+                                    <i class="ph ph-trash" style="color: #ef4444;"></i> Hapus Data
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </td>
             `;
@@ -1137,6 +1152,29 @@ window.addToCalendar = addToCalendar;
 window.installApp = installApp;
 window.exportRecordsToCsv = exportRecordsToCsv;
 window.importRecordsFromJson = importRecordsFromJson;
+
+// Dropdown Toggle Logic
+window.toggleDropdown = function (event, id) {
+  event.stopPropagation();
+  const dropdown = document.getElementById(`dropdown-${id}`);
+  const allDropdowns = document.querySelectorAll(".dropdown-content");
+
+  // Close all other dropdowns
+  allDropdowns.forEach((d) => {
+    if (d.id !== `dropdown-${id}`) {
+      d.classList.remove("show");
+    }
+  });
+
+  // Toggle current dropdown
+  dropdown.classList.toggle("show");
+};
+
+// Close dropdowns when clicking outside
+window.addEventListener("click", () => {
+  const allDropdowns = document.querySelectorAll(".dropdown-content");
+  allDropdowns.forEach((d) => d.classList.remove("show"));
+});
 
 // Trigger file input click for JSON import
 function importRecordsFromJson() {
