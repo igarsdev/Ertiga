@@ -1207,9 +1207,44 @@ if ("serviceWorker" in navigator) {
           "ServiceWorker registration successful with scope: ",
           registration.scope,
         );
+
+        // Check for updates
+        registration.addEventListener("updatefound", () => {
+          const newWorker = registration.installing;
+          newWorker.addEventListener("statechange", () => {
+            if (
+              newWorker.state === "installed" &&
+              navigator.serviceWorker.controller
+            ) {
+              // New update available!
+              Swal.fire({
+                title: "Update Tersedia",
+                text: "Versi terbaru AutoLog sudah siap. Muat ulang sekarang?",
+                icon: "info",
+                showCancelButton: true,
+                confirmButtonText: "Ya, Update",
+                cancelButtonText: "Nanti",
+                confirmButtonColor: "#10b981",
+              }).then((result) => {
+                if (result.isConfirmed) {
+                  newWorker.postMessage({ type: "SKIP_WAITING" });
+                }
+              });
+            }
+          });
+        });
       })
       .catch((err) => {
         console.log("ServiceWorker registration failed: ", err);
       });
+
+    // Reload the page when the new service worker takes control
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener("controllerchange", () => {
+      if (!refreshing) {
+        refreshing = true;
+        window.location.reload();
+      }
+    });
   });
 }

@@ -1,5 +1,5 @@
-const CACHE_NAME = "autolog-v5";
-const RUNTIME_CACHE = "autolog-runtime-v5";
+const CACHE_NAME = "autolog-v6";
+const RUNTIME_CACHE = "autolog-runtime-v6";
 const urlsToCache = [
   "./",
   "./index.html",
@@ -27,6 +27,13 @@ self.addEventListener("install", (event) => {
       .catch((err) => console.error("Cache install error:", err)),
   );
   self.skipWaiting();
+});
+
+// Skip waiting when message received
+self.addEventListener("message", (event) => {
+  if (event.data && event.data.type === "SKIP_WAITING") {
+    self.skipWaiting();
+  }
 });
 
 // Fetch event - Network first, fallback to cache
