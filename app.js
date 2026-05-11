@@ -274,9 +274,10 @@ function init() {
           <button id="importJsonBtn" onclick="Swal.close(); importRecordsFromJson();" style="padding: 12px; border: 1px solid #eee; border-radius: 12px; background: #f8fafc; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 10px;"><i class="ph ph-file-arrow-up"></i> Impor JSON</button>
           <button id="setCurrentKmBtn" onclick="Swal.close(); setCurrentKmPrompt();" style="padding: 12px; border: 1px solid #eee; border-radius: 12px; background: #f8fafc; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 10px;"><i class="ph ph-gauge"></i> Atur Odometer Saat Ini</button>
           <button id="setKmIntervalBtn" onclick="Swal.close(); setKmIntervalPrompt();" style="padding: 12px; border: 1px solid #eee; border-radius: 12px; background: #f8fafc; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 10px;"><i class="ph ph-arrows-left-right"></i> Atur Interval Servis</button>
+          <button id="resetCacheBtn" onclick="resetAppCache();" style="padding: 12px; border: 1px solid #eee; border-radius: 12px; background: #fee2e2; color: #991b1b; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 10px;"><i class="ph ph-trash"></i> Reset Cache & Update</button>
           <button id="installAppBtn" onclick="installApp();" style="padding: 12px; border: 1px solid #eee; border-radius: 12px; background: #10b981; color: white; cursor: pointer; font-weight: 600; display: none; align-items: center; gap: 10px;"><i class="ph ph-download-simple"></i> Install Aplikasi</button>
           <button onclick="location.reload()" style="padding: 12px; border: 1px solid #eee; border-radius: 12px; background: #f8fafc; cursor: pointer; font-weight: 500; display: flex; align-items: center; gap: 10px;"><i class="ph ph-refresh"></i> Refresh Halaman</button>
-          <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 15px; text-align: center; border-top: 1px solid #f1f5f9; padding-top: 10px;">AutoLog v1.0.5 • Build 2026</div>
+          <div style="font-size: 0.75rem; color: #94a3b8; margin-top: 15px; text-align: center; border-top: 1px solid #f1f5f9; padding-top: 10px;">AutoLog v1.0.6 • Build 2026</div>
         </div>
       `,
       showConfirmButton: false,
@@ -292,6 +293,63 @@ function init() {
   // Initial Render
   fetchRecords();
 }
+
+// Reset App Cache & Force Update
+window.resetAppCache = async function () {
+  const result = await Swal.fire({
+    title: "Reset Cache?",
+    text: "Ini akan menghapus file lama dan memaksa aplikasi mengambil versi terbaru dari server. Data riwayat servis Anda TETAP AMAN.",
+    icon: "warning",
+    showCancelButton: true,
+    confirmButtonText: "Ya, Reset & Update",
+    cancelButtonText: "Batal",
+    confirmButtonColor: "#dc2626",
+  });
+
+  if (result.isConfirmed) {
+    Swal.fire({
+      title: "Mereset...",
+      allowOutsideClick: false,
+      didOpen: () => {
+        Swal.showLoading();
+      },
+    });
+
+    try {
+      // Unregister all service workers
+      if ("serviceWorker" in navigator) {
+        const registrations = await navigator.serviceWorker.getRegistrations();
+        for (let registration of registrations) {
+          await registration.unregister();
+        }
+      }
+
+      // Clear all caches
+      if ("caches" in window) {
+        const cacheNames = await caches.keys();
+        for (let name of cacheNames) {
+          await caches.delete(name);
+        }
+      }
+
+      // Clear some specific session storage if needed, but KEEP localStorage
+      sessionStorage.clear();
+
+      Swal.fire({
+        icon: "success",
+        title: "Selesai!",
+        text: "Aplikasi akan dimuat ulang.",
+        timer: 1500,
+        showConfirmButton: false,
+      }).then(() => {
+        window.location.reload(true);
+      });
+    } catch (error) {
+      console.error("Reset error:", error);
+      Swal.fire("Error", "Gagal mereset cache. Silakan refresh manual.", "error");
+    }
+  }
+};
 
 // Install App Function
 async function installApp() {
