@@ -1324,12 +1324,12 @@ if ("serviceWorker" in navigator) {
     navigator.serviceWorker
       .register("./sw.js")
       .then((registration) => {
-        console.log(
-          "ServiceWorker registration successful with scope: ",
-          registration.scope,
-        );
+        console.log("ServiceWorker active");
 
-        // Check for updates
+        // 1. Automatic Update Check on Load
+        registration.update();
+
+        // 2. Automatic Update when new version found
         registration.addEventListener("updatefound", () => {
           const newWorker = registration.installing;
           newWorker.addEventListener("statechange", () => {
@@ -1337,20 +1337,9 @@ if ("serviceWorker" in navigator) {
               newWorker.state === "installed" &&
               navigator.serviceWorker.controller
             ) {
-              // New update available!
-              Swal.fire({
-                title: "Update Tersedia",
-                text: "Versi terbaru AutoLog sudah siap. Muat ulang sekarang?",
-                icon: "info",
-                showCancelButton: true,
-                confirmButtonText: "Ya, Update",
-                cancelButtonText: "Nanti",
-                confirmButtonColor: "#10b981",
-              }).then((result) => {
-                if (result.isConfirmed) {
-                  newWorker.postMessage({ type: "SKIP_WAITING" });
-                }
-              });
+              // New version ready! Apply immediately and silently
+              console.log("New version found, updating automatically...");
+              newWorker.postMessage({ type: "SKIP_WAITING" });
             }
           });
         });
@@ -1358,6 +1347,15 @@ if ("serviceWorker" in navigator) {
       .catch((err) => {
         console.log("ServiceWorker registration failed: ", err);
       });
+
+    // 3. Periodic check when app is visible/focused
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") {
+        navigator.serviceWorker.getRegistration().then((reg) => {
+          if (reg) reg.update();
+        });
+      }
+    });
 
     // Reload the page when the new service worker takes control
     let refreshing = false;
