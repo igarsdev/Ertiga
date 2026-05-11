@@ -54,6 +54,7 @@ const elements = {
   recordId: document.getElementById("recordId"),
   tanggal: document.getElementById("tanggal"),
   tanggalKembali: document.getElementById("tanggalKembali"),
+  clearTanggalKembali: document.getElementById("clearTanggalKembali"),
   perawatan: document.getElementById("perawatan"),
   km: document.getElementById("km"),
   keterangan: document.getElementById("keterangan"),
@@ -126,6 +127,39 @@ function handleResponsiveLayout() {
   );
 }
 
+function getDefaultNextServiceDate() {
+  const today = new Date();
+  const nextService = new Date(today);
+  nextService.setMonth(nextService.getMonth() + 3);
+  const year = nextService.getFullYear();
+  const month = String(nextService.getMonth() + 1).padStart(2, "0");
+  const day = String(nextService.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function syncTanggalKembaliState() {
+  if (!elements.clearTanggalKembali || !elements.tanggalKembali) return;
+
+  if (elements.clearTanggalKembali.checked) {
+    if (elements.tanggalKembali.value) {
+      elements.tanggalKembali.dataset.previousValue =
+        elements.tanggalKembali.value;
+    }
+    elements.tanggalKembali.value = "";
+    elements.tanggalKembali.required = false;
+    elements.tanggalKembali.disabled = true;
+    return;
+  }
+
+  elements.tanggalKembali.disabled = false;
+  elements.tanggalKembali.required = true;
+  if (!elements.tanggalKembali.value) {
+    elements.tanggalKembali.value =
+      elements.tanggalKembali.dataset.previousValue ||
+      getDefaultNextServiceDate();
+  }
+}
+
 // Initialize App
 function init() {
   // Load Vehicle Name
@@ -155,6 +189,12 @@ function init() {
   elements.notifToggle.addEventListener("click", requestNotificationPermission);
   elements.closeModalBtn.addEventListener("click", closeModal);
   elements.cancelBtn.addEventListener("click", closeModal);
+  if (elements.clearTanggalKembali) {
+    elements.clearTanggalKembali.addEventListener(
+      "change",
+      syncTanggalKembaliState,
+    );
+  }
   elements.recordModal.addEventListener("click", (e) => {
     if (e.target === elements.recordModal) closeModal();
   });
@@ -504,6 +544,7 @@ function checkUpcomingForNotif() {
   today.setHours(0, 0, 0, 0);
 
   records.forEach((record) => {
+    if (!record.tanggalKembali) return;
     const targetDate = new Date(record.tanggalKembali);
     targetDate.setHours(0, 0, 0, 0);
 
@@ -546,6 +587,14 @@ function formatDateToYYYYMMDD(dateString) {
 function addToCalendar(id) {
   const record = records.find((r) => r.id === id);
   if (!record) return;
+  if (!record.tanggalKembali) {
+    Swal.fire({
+      icon: "info",
+      title: "Tanggal kembali kosong",
+      text: "Isi tanggal kembali terlebih dahulu sebelum menambahkan ke kalender.",
+    });
+    return;
+  }
   const title = `${getPerawatanLabel(record.perawatan)} - ${elements.vehicleInfo.textContent.trim()}`;
   const defaultTime = "09:00";
   Swal.fire({
@@ -680,11 +729,17 @@ function openModal(editId = null) {
       elements.perawatan.value = record.perawatan;
       elements.km.value = record.km.toLocaleString("en-US");
       elements.keterangan.value = record.keterangan;
+      if (elements.clearTanggalKembali) {
+        elements.clearTanggalKembali.checked = !record.tanggalKembali;
+      }
     }
   } else {
     elements.modalTitle.textContent = "Tambah Catatan Baru";
     elements.recordForm.reset();
     elements.recordId.value = "";
+    if (elements.clearTanggalKembali) {
+      elements.clearTanggalKembali.checked = false;
+    }
 
     // Default dates
     const today = new Date();
@@ -692,21 +747,20 @@ function openModal(editId = null) {
     const month = String(today.getMonth() + 1).padStart(2, "0");
     const day = String(today.getDate()).padStart(2, "0");
     elements.tanggal.value = `${year}-${month}-${day}`;
-
-    // Default next service (+3 months)
-    const nextService = new Date(today);
-    nextService.setMonth(nextService.getMonth() + 3);
-    const nextYear = nextService.getFullYear();
-    const nextMonth = String(nextService.getMonth() + 1).padStart(2, "0");
-    const nextDay = String(nextService.getDate()).padStart(2, "0");
-    elements.tanggalKembali.value = `${nextYear}-${nextMonth}-${nextDay}`;
+    elements.tanggalKembali.dataset.previousValue = getDefaultNextServiceDate();
+    elements.tanggalKembali.value =
+      elements.tanggalKembali.dataset.previousValue;
   }
 
+  syncTanggalKembaliState();
+
   elements.recordModal.classList.add("active");
+  document.body.classList.add("modal-open");
 }
 
 function closeModal() {
   elements.recordModal.classList.remove("active");
+  document.body.classList.remove("modal-open");
 }
 
 // Form Submit Handler
@@ -715,10 +769,14 @@ async function handleFormSubmit(e) {
 
   const id = elements.recordId.value;
   const kmValue = parseInt(elements.km.value.replace(/\D/g, ""), 10) || 0;
+  const tanggalKembaliValue =
+    elements.clearTanggalKembali && elements.clearTanggalKembali.checked
+      ? ""
+      : elements.tanggalKembali.value;
 
   const recordData = {
     tanggal: elements.tanggal.value,
-    tanggalKembali: elements.tanggalKembali.value,
+    tanggalKembali: tanggalKembaliValue,
     perawatan: elements.perawatan.value,
     km: kmValue,
     keterangan: elements.keterangan.value,
@@ -858,8 +916,15 @@ function updateSortHeaders() {
 function renderTable() {
   // 1. Filter
   let filteredRecords = records.filter((r) => {
-    const matchFilter =
-      currentFilter === "all" || r.perawatan === currentFilter;
+    let matchFilter = false;
+    if (currentFilter === "all") {
+      matchFilter = true;
+    } else if (currentFilter === "noDate") {
+      matchFilter = !r.tanggalKembali;
+    } else {
+      matchFilter = r.perawatan === currentFilter;
+    }
+
     const matchSearch = r.keterangan.toLowerCase().includes(currentSearch);
     return matchFilter && matchSearch;
   });
@@ -876,6 +941,12 @@ function renderTable() {
       currentSort.column === "tanggal" ||
       currentSort.column === "tanggalKembali"
     ) {
+      const aMissing = !valA;
+      const bMissing = !valB;
+      if (aMissing || bMissing) {
+        if (aMissing && bMissing) return 0;
+        return aMissing ? 1 : -1;
+      }
       valA = new Date(valA).getTime();
       valB = new Date(valB).getTime();
     }
@@ -907,8 +978,7 @@ function renderTable() {
                 <td data-label="No">${index + 1}</td>
                 <td data-label="Tanggal">${formatDate(record.tanggal)}</td>
                 <td data-label="Kembali">
-                    ${formatDate(record.tanggalKembali)}
-                    ${isWarning ? '<span class="warning-badge"><i class="ph-fill ph-warning-circle"></i> Segera</span>' : ""}
+                  ${record.tanggalKembali ? `${formatDate(record.tanggalKembali)} ${isWarning ? '<span class="warning-badge"><i class="ph-fill ph-warning-circle"></i> Segera</span>' : ""}` : '<span class="no-date-badge">📅 Belum diatur</span>'}
                 </td>
                 <td data-label="Perawatan"><span class="badge-category cat-${record.perawatan}">${getPerawatanLabel(record.perawatan)}</span></td>
                 <td data-label="KM">${record.km.toLocaleString("en-US")}</td>
@@ -965,11 +1035,13 @@ function updateDashboardStats() {
   today.setHours(0, 0, 0, 0);
 
   // Sort all records by tanggalKembali
-  const upcomingRecords = [...records].sort(
-    (a, b) =>
-      new Date(a.tanggalKembali).getTime() -
-      new Date(b.tanggalKembali).getTime(),
-  );
+  const upcomingRecords = [...records]
+    .filter((record) => record.tanggalKembali)
+    .sort(
+      (a, b) =>
+        new Date(a.tanggalKembali).getTime() -
+        new Date(b.tanggalKembali).getTime(),
+    );
 
   // Find the nearest one that is >= today
   let nearest = upcomingRecords.find(
@@ -993,6 +1065,9 @@ function updateDashboardStats() {
         nearest.tanggalKembali,
       );
     }
+  } else {
+    elements.upcomingCard.classList.remove("warning-card");
+    elements.summaryUpcomingService.textContent = "-";
   }
 }
 
@@ -1059,7 +1134,7 @@ function handleImportFile(e) {
             keterangan: it.keterangan || it.notes || "",
           };
         })
-        .filter((r) => r.tanggal && r.tanggalKembali);
+        .filter((r) => r.tanggal);
 
       if (normalized.length === 0) {
         Swal.fire(

@@ -806,6 +806,12 @@ tbody tr:hover td {
   box-shadow: 0 6px 25px rgba(30, 58, 138, 0.5);
 }
 
+body.modal-open .floating-add-btn {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
 /* Modal */
 .modal-overlay {
   position: fixed;
@@ -816,7 +822,7 @@ tbody tr:hover td {
   background: rgba(15, 23, 42, 0.4);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
-  z-index: 1000;
+  z-index: 2000;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -911,7 +917,7 @@ tbody tr:hover td {
   color: var(--text-main);
 }
 
-.form-group input,
+.form-group input:not([type="checkbox"]),
 .form-group select,
 .form-group textarea {
   padding: 14px 16px;
@@ -926,6 +932,25 @@ tbody tr:hover td {
   /* Prevent auto-zoom on iOS */
   -webkit-appearance: none;
   appearance: none;
+}
+
+.form-group input[type="checkbox"] {
+  min-height: 18px;
+  min-width: 18px;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border-radius: 4px;
+  accent-color: var(--primary);
+  flex-shrink: 0;
+  -webkit-appearance: checkbox;
+  appearance: checkbox;
+}
+
+.form-group input:disabled {
+  background: rgba(248, 250, 252, 0.9);
+  color: var(--text-muted);
+  cursor: not-allowed;
 }
 
 .form-group input:focus,
@@ -954,9 +979,81 @@ tbody tr:hover td {
   padding-left: 44px;
 }
 
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 2px;
+}
+
+.checkbox-row label {
+  font-size: 0.825rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+/* Custom switch for clearTanggalKembali to ensure visibility in all browsers */
+.switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+}
+.switch input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.switch .slider {
+  width: 42px;
+  height: 24px;
+  background: #e6e9ef;
+  border-radius: 999px;
+  position: relative;
+  transition: background 0.2s ease;
+  flex-shrink: 0;
+}
+.switch .slider::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 3px;
+  transform: translateY(-50%);
+  width: 18px;
+  height: 18px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
+  transition: left 0.18s ease;
+}
+.switch input:checked + .slider {
+  background: linear-gradient(90deg, var(--primary), var(--primary-light));
+}
+.switch input:checked + .slider::after {
+  left: 21px;
+}
+.switch .switch-label {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.no-date-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border-radius: 12px;
+  background: rgba(99, 102, 241, 0.08);
+  color: #4f46e5;
+  font-weight: 600;
+  font-size: 0.85rem;
+}
+
 /* Mobile input improvements */
 @supports (padding: max(0px)) {
-  input,
+  input:not([type="checkbox"]),
   select,
   textarea {
     padding-left: max(16px, env(safe-area-inset-left));
@@ -1566,13 +1663,19 @@ div:where(.swal2-container) button:where(.swal2-styled).swal2-cancel:hover {
 
   @keyframes radialPulse {
     0% {
-      box-shadow: 0 0 0 0 rgba(30, 58, 138, 0.4), 0 8px 30px rgba(30, 58, 138, 0.5);
+      box-shadow:
+        0 0 0 0 rgba(30, 58, 138, 0.4),
+        0 8px 30px rgba(30, 58, 138, 0.5);
     }
     70% {
-      box-shadow: 0 0 0 15px rgba(30, 58, 138, 0), 0 8px 30px rgba(30, 58, 138, 0.5);
+      box-shadow:
+        0 0 0 15px rgba(30, 58, 138, 0),
+        0 8px 30px rgba(30, 58, 138, 0.5);
     }
     100% {
-      box-shadow: 0 0 0 0 rgba(30, 58, 138, 0), 0 8px 30px rgba(30, 58, 138, 0.5);
+      box-shadow:
+        0 0 0 0 rgba(30, 58, 138, 0),
+        0 8px 30px rgba(30, 58, 138, 0.5);
     }
   }
 
@@ -1722,7 +1825,7 @@ div:where(.swal2-container) button:where(.swal2-styled).swal2-cancel:hover {
     background: white;
     border: 1px solid var(--border);
     border-radius: 12px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
   }
 
   #logTable .row-warning {

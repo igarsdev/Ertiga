@@ -131,6 +131,9 @@
                 P2: Servis Rutin
               </button>
               <button class="filter-btn" data-filter="P3">P3: Lain-lain</button>
+              <button class="filter-btn" data-filter="noDate">
+                Belum diatur
+              </button>
             </div>
           </div>
 
@@ -216,7 +219,14 @@
 
             <div class="form-group">
               <label for="tanggalKembali">Tanggal Kembali (Next Service)</label>
-              <input type="date" id="tanggalKembali" required />
+              <div class="checkbox-row">
+                <label class="switch">
+                  <input type="checkbox" id="clearTanggalKembali" />
+                  <span class="slider" aria-hidden="true"></span>
+                  <span class="switch-label">Kosongkan tanggal kembali</span>
+                </label>
+              </div>
+              <input type="date" id="tanggalKembali" />
             </div>
 
             <div class="form-group">
