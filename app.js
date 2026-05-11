@@ -1034,7 +1034,10 @@ function renderTable() {
 
       tr.innerHTML = `
                 <td data-label="No">${index + 1}</td>
-                <td data-label="Tanggal">${formatDate(record.tanggal)}</td>
+                <td data-label="Tanggal">
+                  ${formatDate(record.tanggal)}
+                  <i class="ph ph-caret-down expand-icon mobile-only"></i>
+                </td>
                 <td data-label="Kembali">
                   ${record.tanggalKembali ? `${formatDate(record.tanggalKembali)} ${isWarning ? '<span class="warning-badge"><i class="ph-fill ph-warning-circle"></i> Segera</span>' : ""}` : '<span class="no-date-badge">📅 Belum diatur</span>'}
                 </td>
@@ -1065,6 +1068,17 @@ function renderTable() {
                     </div>
                 </td>
             `;
+
+      // Add click listener for mobile expansion
+      tr.addEventListener("click", (e) => {
+        if (window.innerWidth <= 768) {
+          // Don't expand if clicking buttons or dropdown
+          if (e.target.closest(".dropdown") || e.target.closest(".dropdown-item"))
+            return;
+          tr.classList.toggle("expanded");
+        }
+      });
+
       elements.tableBody.appendChild(tr);
     });
   }
