@@ -1911,15 +1911,51 @@ div:where(.swal2-container) button:where(.swal2-styled).swal2-cancel:hover {
   .actions {
     gap: 12px;
     width: 100%;
-    justify-content: space-around;
+    justify-content: center;
+    margin: 5px 0;
   }
-  .action-btn {
-    width: 44px;
-    height: 44px;
+
+  .dropdown-btn {
+    width: 50px;
+    height: 50px;
     background: white;
     border: 1px solid var(--border);
-    border-radius: 12px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+    border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    color: var(--primary);
+  }
+
+  .dropdown-btn i {
+    font-size: 24px;
+  }
+
+  .dropdown-content {
+    right: 50%;
+    transform: translateX(50%);
+    width: 200px;
+    bottom: calc(100% + 10px);
+    top: auto;
+    transform-origin: bottom;
+  }
+
+  @keyframes dropdownAnim {
+    from {
+      opacity: 0;
+      transform: translateX(50%) scale(0.9);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(50%) scale(1);
+    }
+  }
+
+  #logTable td[data-label="No"] {
+    background: transparent !important;
+    color: var(--text-main);
+  }
+
+  #logTable td[data-label="No"]::before {
+    color: var(--text-muted);
   }
 
   #logTable .row-warning {

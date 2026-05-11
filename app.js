@@ -1044,8 +1044,8 @@ function renderTable() {
                 <td data-label="Aksi">
                     <div class="actions">
                         <div class="dropdown">
-                            <button class="dropdown-btn" onclick="toggleDropdown(event, '${record.id}')">
-                                <i class="ph ph-dots-three-outline-vertical-fill"></i>
+                            <button class="dropdown-btn" onclick="toggleDropdown(event, '${record.id}')" aria-label="Menu Aksi">
+                                <i class="ph-bold ph-dots-three-vertical"></i>
                             </button>
                             <div id="dropdown-${record.id}" class="dropdown-content">
                                 <button class="dropdown-item" onclick="sendToWhatsApp('${record.id}')">
