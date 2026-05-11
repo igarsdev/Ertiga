@@ -976,7 +976,7 @@ body.modal-open .floating-add-btn {
 
 .input-with-icon input {
   width: 100%;
-  padding-left: 44px;
+  padding-left: 48px !important;
 }
 
 .checkbox-row {
