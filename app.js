@@ -642,7 +642,15 @@ function formatDateToYYYYMMDD(dateString) {
   return `${y}${m}${day}`;
 }
 
-function addToCalendar(id) {
+function addToCalendar(event, id) {
+  if (event && typeof event === "object" && event.stopPropagation) {
+    event.stopPropagation();
+  }
+  // Fallback for older calls
+  if (typeof event === "string" && !id) {
+    id = event;
+    event = null;
+  }
   const record = records.find((r) => r.id === id);
   if (!record) return;
   if (!record.tanggalKembali) {
@@ -750,7 +758,8 @@ function downloadIcsWithTime(title, record, time) {
 }
 
 // WhatsApp Integration
-function sendToWhatsApp(id) {
+function sendToWhatsApp(event, id) {
+  if (event) event.stopPropagation();
   const record = records.find((r) => r.id === id);
   if (!record) return;
 
@@ -776,7 +785,17 @@ function formatKmInput(e) {
 }
 
 // Modal Functions
-function openModal(editId = null) {
+function openModal(event = null, editId = null) {
+  if (event && typeof event === "object" && event.stopPropagation) {
+    event.stopPropagation();
+  }
+
+  // If the first argument is a string (id) and second is null, swap them for backward compatibility if called without event
+  if (typeof event === "string" && editId === null) {
+    editId = event;
+    event = null;
+  }
+
   if (editId) {
     const record = records.find((r) => r.id === editId);
     if (record) {
@@ -887,7 +906,15 @@ async function handleFormSubmit(e) {
 }
 
 // Delete Record
-function deleteRecord(id) {
+function deleteRecord(event, id) {
+  if (event && typeof event === "object" && event.stopPropagation) {
+    event.stopPropagation();
+  }
+  // Fallback for older calls
+  if (typeof event === "string" && !id) {
+    id = event;
+    event = null;
+  }
   Swal.fire({
     title: "Hapus Data?",
     text: "Data yang dihapus tidak dapat dikembalikan!",
@@ -1046,25 +1073,10 @@ function renderTable() {
                 <td data-label="Keterangan">${record.keterangan}</td>
                 <td data-label="Aksi">
                     <div class="actions">
-                        <div class="dropdown">
-                            <button class="dropdown-btn" onclick="toggleDropdown(event, '${record.id}')" aria-label="Menu Aksi">
-                                <i class="ph-bold ph-dots-three-vertical"></i>
-                            </button>
-                            <div id="dropdown-${record.id}" class="dropdown-content">
-                                <button class="dropdown-item" onclick="sendToWhatsApp('${record.id}')">
-                                    <i class="ph ph-whatsapp-logo" style="color: #16a34a;"></i> WhatsApp
-                                </button>
-                                <button class="dropdown-item" onclick="addToCalendar('${record.id}')">
-                                    <i class="ph ph-calendar-plus" style="color: #2563eb;"></i> Kalender
-                                </button>
-                                <button class="dropdown-item" onclick="openModal('${record.id}')">
-                                    <i class="ph ph-pencil-simple" style="color: #4338ca;"></i> Edit Data
-                                </button>
-                                <button class="dropdown-item delete" onclick="deleteRecord('${record.id}')">
-                                    <i class="ph ph-trash" style="color: #ef4444;"></i> Hapus Data
-                                </button>
-                            </div>
-                        </div>
+                        <button class="action-btn wa-btn" onclick="sendToWhatsApp(event, '${record.id}')" title="Kirim ke WhatsApp"><i class="ph ph-whatsapp-logo"></i></button>
+                        <button class="action-btn cal-btn" onclick="addToCalendar(event, '${record.id}')" title="Add to Calendar"><i class="ph ph-calendar-plus"></i></button>
+                        <button class="action-btn edit-btn" onclick="openModal(event, '${record.id}')" title="Edit"><i class="ph ph-pencil-simple"></i></button>
+                        <button class="action-btn delete-btn" onclick="deleteRecord(event, '${record.id}')" title="Delete"><i class="ph ph-trash"></i></button>
                     </div>
                 </td>
             `;
@@ -1072,9 +1084,8 @@ function renderTable() {
       // Add click listener for mobile expansion
       tr.addEventListener("click", (e) => {
         if (window.innerWidth <= 768) {
-          // Don't expand if clicking buttons or dropdown
-          if (e.target.closest(".dropdown") || e.target.closest(".dropdown-item"))
-            return;
+          // Don't expand if clicking any button (action buttons or dropdown)
+          if (e.target.closest("button")) return;
           tr.classList.toggle("expanded");
         }
       });

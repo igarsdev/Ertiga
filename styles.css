@@ -1954,6 +1954,39 @@ div:where(.swal2-container) button:where(.swal2-styled).swal2-cancel:hover {
     color: var(--primary);
   }
 
+  .actions {
+    gap: 12px;
+    width: 100%;
+    justify-content: center;
+    margin: 5px 0;
+    flex-wrap: wrap;
+    display: flex;
+  }
+
+  .action-btn {
+    width: 50px;
+    height: 50px;
+    background: white;
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    color: var(--text-muted);
+    font-size: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .wa-btn { color: #16a34a !important; border-color: #bbf7d0 !important; background: #f0fdf4 !important; }
+  .cal-btn { color: #2563eb !important; border-color: #bfdbfe !important; background: #eff6ff !important; }
+  .edit-btn { color: #4338ca !important; border-color: #c7d2fe !important; background: #eef2ff !important; }
+  .delete-btn { color: #dc2626 !important; border-color: #fecaca !important; background: #fef2f2 !important; }
+
+  #logTable .row-warning {
+    border-left: 6px solid var(--accent) !important;
+  }
+
   .mobile-only {
     display: block !important;
   }
@@ -1968,14 +2001,9 @@ div:where(.swal2-container) button:where(.swal2-styled).swal2-cancel:hover {
     transform: rotate(180deg);
     color: var(--primary);
   }
-
-  #logTable .row-warning {
-    border-left: 6px solid var(--accent) !important;
-  }
 }
 
 /* Helper Class */
 .mobile-only {
   display: none;
-}
 }
