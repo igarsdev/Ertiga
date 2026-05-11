@@ -1646,33 +1646,72 @@ div:where(.swal2-container) button:where(.swal2-styled).swal2-cancel:hover {
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
-    padding: 12px 16px;
+    padding: 10px 16px;
     margin-top: 0;
     top: 0;
-    border-radius: 0 0 20px 20px;
-    background: rgba(255, 255, 255, 0.9);
+    border-radius: 0 0 15px 15px;
+    background: rgba(255, 255, 255, 0.95);
     position: sticky;
+    height: auto;
+    min-height: 70px;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo-icon {
+    font-size: 28px !important;
   }
 
   .header-titles h1 {
-    font-size: 1.2rem;
-    background: linear-gradient(135deg, var(--primary), var(--primary-light));
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    font-size: 1rem !important;
+    line-height: 1.1;
+    margin: 0;
+    font-weight: 800;
   }
+
   .vehicle-info {
-    font-size: 0.8rem;
-    opacity: 0.8;
+    font-size: 0.7rem;
+    display: block;
+    margin-top: 2px;
+    color: var(--text-muted);
   }
 
   .header-actions {
-    gap: 8px;
+    gap: 4px;
   }
+
+  /* Fix Filter Buttons Overlapping */
+  .filter-group {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding: 5px 0 15px 0;
+    gap: 8px;
+    width: 100%;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none; /* Hide scrollbar Firefox */
+  }
+
+  .filter-group::-webkit-scrollbar {
+    display: none; /* Hide scrollbar Chrome/Safari */
+  }
+
+  .filter-btn {
+    flex: 0 0 auto; /* Prevent shrinking */
+    padding: 8px 16px;
+    font-size: 0.85rem;
+    white-space: nowrap;
+  }
+
   .mobile-only-btn {
     display: block;
   }
   .icon-btn {
-    font-size: 20px;
+    font-size: 18px;
   }
   .user-profile i {
     font-size: 30px;
