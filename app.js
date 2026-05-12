@@ -968,7 +968,6 @@ async function handleFormSubmit(e) {
     Swal.fire({
       icon: "success",
       title: "Tersimpan!",
-  saveRecordsCache(records);
       text: "Data perawatan berhasil disimpan ke Cloud.",
       timer: 1500,
       showConfirmButton: false,
