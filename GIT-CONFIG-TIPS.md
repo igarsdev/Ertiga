@@ -54,6 +54,7 @@ git config --list
 Kalau ingin push lebih cepat tanpa password dialog:
 
 ### Step 1: Generate SSH Key
+
 ```powershell
 ssh-keygen -t ed25519 -C "your.email@github.com"
 # Press Enter untuk default location
@@ -61,6 +62,7 @@ ssh-keygen -t ed25519 -C "your.email@github.com"
 ```
 
 ### Step 2: Add to SSH Agent
+
 ```powershell
 # Start SSH Agent
 Start-Service ssh-agent
@@ -70,11 +72,13 @@ ssh-add $env:USERPROFILE\.ssh\id_ed25519
 ```
 
 ### Step 3: Add to GitHub
+
 1. Copy public key: `type $env:USERPROFILE\.ssh\id_ed25519.pub | clip`
 2. Go to GitHub Settings → SSH and GPG keys
 3. New SSH key → Paste → Save
 
 ### Step 4: Change Remote URL
+
 ```powershell
 cd K:\Website\Ertiga
 git remote set-url origin git@github.com:igarsdev/Ertiga.git
@@ -107,6 +111,7 @@ git config --global alias.lg "log --graph --abbrev-commit --decorate --format=fo
 ```
 
 Usage:
+
 ```powershell
 git st              # status
 git aa              # add .
@@ -133,6 +138,7 @@ git add . && git commit -m "message" && git push origin main
 ## 🔐 Store Credentials Securely
 
 ### Windows Credential Manager (Sudah Setup)
+
 ```powershell
 # Check stored credentials
 cmdkey /list
@@ -142,6 +148,7 @@ cmdkey /delete:https://github.com
 ```
 
 ### GitHub Personal Access Token
+
 1. GitHub Settings → Developer settings → Personal access tokens
 2. Generate new token
 3. Give scope: `repo` (Full control of private repositories)
@@ -151,17 +158,20 @@ cmdkey /delete:https://github.com
 ## 📈 Performance Tips
 
 ### Disable auto-GC untuk folder besar
+
 ```powershell
 cd K:\Website\Ertiga
 git config core.autogc false
 ```
 
 ### Pack objects untuk faster push
+
 ```powershell
 git gc --aggressive
 ```
 
 ### Shallow clone untuk project besar (optional)
+
 ```powershell
 # Clone only recent history
 git clone --depth 1 https://github.com/igarsdev/Ertiga.git
@@ -186,11 +196,13 @@ git clone --depth 1 https://github.com/igarsdev/Ertiga.git
 ## ✅ Verify Setup
 
 Check semua config:
+
 ```powershell
 git config --list | findstr /i "push pull credential"
 ```
 
 Output seharusnya:
+
 ```
 push.default=current
 push.autoSetupRemote=true
@@ -203,6 +215,7 @@ credential.helper=manager-core
 ## 🆘 Troubleshooting Git Config
 
 ### SSH key tidak bekerja
+
 ```powershell
 # Test connection
 ssh -T git@github.com
@@ -212,6 +225,7 @@ ssh -vT git@github.com
 ```
 
 ### Credential tidak tersimpan
+
 ```powershell
 # Check credential helper
 git config credential.helper
@@ -221,6 +235,7 @@ git config --global credential.helper manager-core
 ```
 
 ### Push timeout
+
 ```powershell
 # Increase timeout
 git config --global http.postBuffer 524288000

@@ -5,12 +5,14 @@ Ikuti langkah-langkah di bawah untuk setup keyboard shortcut di VS Code.
 ## Step-by-Step Setup
 
 ### Step 1: Buka Keybindings File
+
 1. Buka VS Code
 2. Tekan **`Ctrl+Shift+P`** (Command Palette)
 3. Ketik: **`Preferences: Open Keyboard Shortcuts (JSON)`**
 4. Tekan Enter
 
 Atau manual:
+
 - File → Preferences → Keyboard Shortcuts
 - Klik icon `{}` di kanan atas untuk switch ke JSON view
 
@@ -35,6 +37,7 @@ Salin kode di bawah dan paste ke file `keybindings.json` yang sudah terbuka:
 ```
 
 ### Step 3: Save dan Restart
+
 1. Tekan **`Ctrl+S`** untuk save
 2. Restart VS Code (atau reload window)
 
@@ -45,7 +48,9 @@ Salin kode di bawah dan paste ke file `keybindings.json` yang sudah terbuka:
 Setelah setup, Anda bisa gunakan:
 
 ### `Ctrl+Shift+G` - Quick Commit & Push
+
 Commit dengan pesan default "Update" dan langsung push:
+
 ```
 ✔️ Staged semua changes
 ✔️ Commit dengan pesan "Update"
@@ -53,7 +58,9 @@ Commit dengan pesan default "Update" dan langsung push:
 ```
 
 ### `Ctrl+Shift+Alt+G` - Quick Commit & Push (With Message)
+
 Commit dengan custom message:
+
 ```
 1. Tekan Ctrl+Shift+Alt+G
 2. Input pesan commit yang ingin Anda gunakan
@@ -99,20 +106,26 @@ Jika Anda tidak suka shortcuts `Ctrl+Shift+G`, Anda bisa menggantinya dengan:
 ## 🆘 Troubleshooting
 
 ### "Keybinding tidak bekerja"
+
 **Solution:**
+
 - Pastikan `.vscode/tasks.json` ada di project root
 - Pastikan task names di keybindings.json sesuai dengan task di tasks.json
 - Restart VS Code setelah save keybindings
 
 ### "Command palette shows 'command not found'"
+
 **Solution:**
+
 - Buka Terminal VS Code (`Ctrl+` `` ` ``)
 - Run: `git status`
 - Jika error, berarti folder bukan git repo
 - Jika ok, berarti tasks.json belum ter-load dengan benar, try restart VS Code
 
 ### "Keybinding bekerja tapi task tidak run"
+
 **Solution:**
+
 - Buka Command Palette → `Tasks: Run Task`
 - Seharusnya muncul task "Quick Commit & Push"
 - Jika tidak muncul, berarti `.vscode/tasks.json` tidak valid
@@ -139,6 +152,7 @@ Setelah setup, Anda bisa test dengan:
 ## 📌 Extra Tips
 
 ### Tip 1: Disable keybinding untuk project tertentu
+
 Kalau Anda ingin keybinding ini hanya active di folder tertentu:
 
 ```json
@@ -151,12 +165,15 @@ Kalau Anda ingin keybinding ini hanya active di folder tertentu:
 ```
 
 ### Tip 2: Combine dengan Git lens
+
 Install extension **GitLens** untuk tambahan power:
+
 - Lihat siapa yang edit setiap line
 - View commit history
 - Blame mode
 
 ### Tip 3: Auto-format sebelum commit
+
 Kalau ingin auto-format code sebelum commit, buka `.vscode/tasks.json` dan tambahkan pre-commit task.
 
 ---
