@@ -22,6 +22,7 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const RECORDS_CACHE_KEY = "autolog_records_cache";
 
 // Enable Offline Persistence for Mobile Stability
 enableIndexedDbPersistence(db).catch((err) => {
@@ -176,6 +177,13 @@ function init() {
   const savedVehicle = localStorage.getItem("autolog_vehicle");
   if (savedVehicle) {
     elements.vehicleInfo.textContent = savedVehicle;
+  }
+
+  records = loadCachedRecords();
+  if (records.length > 0) {
+    updateSortHeaders();
+    renderTable();
+    initNotifications();
   }
 
   elements.vehicleInfo.addEventListener("blur", () => {
@@ -460,6 +468,7 @@ async function fetchRecords() {
       id: doc.id,
       ...doc.data(),
     }));
+    saveRecordsCache(records);
     updateSortHeaders();
     renderTable();
     initNotifications();
@@ -472,6 +481,17 @@ async function fetchRecords() {
     } else if (error.code === "unavailable") {
       errorMsg =
         "Layanan database tidak tersedia (sedang offline). Periksa internet Anda.";
+    }
+
+    if (records.length > 0) {
+      Swal.fire({
+        icon: "warning",
+        title: "Sinkronisasi Cloud gagal",
+        text: `${errorMsg} Data lokal tetap ditampilkan.`,
+        confirmButtonText: "Tutup",
+        confirmButtonColor: "#3b82f6",
+      });
+      return;
     }
 
     Swal.fire({
@@ -487,6 +507,29 @@ async function fetchRecords() {
         fetchRecords();
       }
     });
+  }
+}
+
+function loadCachedRecords() {
+  try {
+    const cached = localStorage.getItem(RECORDS_CACHE_KEY);
+    if (!cached) return [];
+
+    const parsed = JSON.parse(cached);
+    return Array.isArray(parsed)
+      ? parsed.filter((record) => record && typeof record === "object")
+      : [];
+  } catch (error) {
+    console.warn("Error reading cached records:", error);
+    return [];
+  }
+}
+
+function saveRecordsCache(nextRecords) {
+  try {
+    localStorage.setItem(RECORDS_CACHE_KEY, JSON.stringify(nextRecords));
+  } catch (error) {
+    console.warn("Error saving cached records:", error);
   }
 }
 
@@ -917,6 +960,7 @@ async function handleFormSubmit(e) {
       records.push({ id: docRef.id, ...recordData });
     }
 
+    saveRecordsCache(records);
     renderTable();
     checkUpcomingForNotif();
     closeModal();
@@ -924,6 +968,7 @@ async function handleFormSubmit(e) {
     Swal.fire({
       icon: "success",
       title: "Tersimpan!",
+  saveRecordsCache(records);
       text: "Data perawatan berhasil disimpan ke Cloud.",
       timer: 1500,
       showConfirmButton: false,
@@ -1323,6 +1368,7 @@ function handleImportFile(e) {
       });
 
       await Promise.all(promises);
+      saveRecordsCache(records);
       renderTable();
 
       Swal.fire({
